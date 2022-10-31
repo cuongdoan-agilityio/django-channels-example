@@ -6,7 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 # Import the Message model
 from .models import Room, Message, Engagement
 
-SYSTEM_ID = "a3fa63b2cc55457881b2efaa64d31d84"
+SYSTEM_ID = "4044d2e7ff0e4d769d5632b3f33459bc"
 
 the_scripts = ['text','yes_no']
 
@@ -42,7 +42,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         room_id = data["room_id"]
 
         engagement = await self.get_engagement_by_id(engagement_id)
-        await self.save_message(room_id, message, engagement)
+
+        select_index = random.choice(list_index)
+        entity = the_scripts[select_index]
+        
+        await self.save_message(room_id, message, engagement, select_index)
         
         # Send message to room group
         await self.channel_layer.group_send(
@@ -52,7 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message": message,
                 "engagement_name": engagement.name,
                 "room_id": room_id,
-                "entity": the_scripts[random.choice(list_index)],
+                "entity": entity,
             }
         )
 
@@ -78,10 +82,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return Engagement.objects.get(uuid=engagement_id)
 
     @sync_to_async
-    def save_message(self, room_id, message, engagement):
+    def save_message(self, room_id, message, engagement, entity):
         room = Room.objects.get(uuid=room_id)
         Message.objects.create(
             engagement=engagement,
             room=room,
-            content=message
+            content=message,
+            entity = entity,
         )

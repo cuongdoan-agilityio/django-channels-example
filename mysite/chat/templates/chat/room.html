@@ -77,6 +77,22 @@
               <div class="message-content">
                 <div class="message-text">
                   <p class="mb-0">{{ m.content }}</p>
+                  {% if m.entity == 1 %}
+                    <div class="d-flex pt-4">
+                      <input
+                        type="button"
+                        class="btn btn-primary"
+                        value="Yes"
+                        id="accept"
+                      ></input>
+                      <input
+                        type="button"
+                        class="btn btn-danger mx-2"
+                        value="No"
+                        id="denial"
+                      ></input>
+                    </div>
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -132,14 +148,16 @@
                   <input
                     type="button"
                     class="btn btn-primary"
-                    value="Accept"
+                    value="Yes"
                     id="accept"
+                    name="accept"
                   ></input>
                   <input
                     type="button"
                     class="btn btn-danger mx-2"
-                    value="Denial"
+                    value="No"
                     id="denial"
+                    name="denial"
                   ></input>
                 </div>
               </div>
@@ -164,6 +182,34 @@
           data.engagement_name,
           data.message
         );
+
+        $(`input[type=button][id=accept][name=accept]`).on('click', function() {
+          const engagementInputDom = document.querySelector('#chat-engagement-input');
+          const engagementId = engagementInputDom.value;
+      
+          // chatSocket.send(
+          //  JSON.stringify({
+          //    message_id: 1,
+          //    room_id: roomId,
+          //    engagement_id: engagementId,
+          //    accepted: true
+          //  })
+          // );
+        })
+
+        $(`input[type=button][id=denial][name=denial]`).on('click', function() {
+          const engagementInputDom = document.querySelector('#chat-engagement-input');
+          const engagementId = engagementInputDom.value;
+      
+          // chatSocket.send(
+          //  JSON.stringify({
+          //    message_id: 1,
+          //    room_id: roomId,
+          //    engagement_id: engagementId,
+          //    accepted: false
+          //  })
+          // );
+        })
       }
 
       if (data.entity === 'text') {

@@ -29,6 +29,7 @@ class Message(models.Model):
     engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
     content = models.TextField()
     date_added = models.DateTimeField(auto_now_add=True)
+    entity = models.IntegerField()
 
     class Meta:
         ordering = ("date_added",)
