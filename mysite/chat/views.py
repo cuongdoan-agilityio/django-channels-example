@@ -1,5 +1,7 @@
 from django.shortcuts import render
+
 from .models import Engagement, Room, Message
+from .constants import default_entities_types
 
 
 def index(request):
@@ -24,6 +26,7 @@ def room(request, uuid):
         {
             'room': room,
             'messages': messages,
-            'engagement_id': engagement_id
+            'engagement_id': engagement_id,
+            "default_entities_types": default_entities_types,
         }
     )

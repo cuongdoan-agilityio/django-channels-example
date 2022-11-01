@@ -1,97 +1,29 @@
 {% extends 'chat/index.html' %}
-{% block style %}
-  <style>
-    #chat-body, .form-chat {
-      width: 600px;
-      margin: 0 auto;
-    }
 
-    #chat-body {
-      background: #ebf1f7;
-      padding: 10px;
-      height: 500px;
-      overflow-y: auto;
-      border-radius: 5px;
-    }
-
-    .message {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .message-out .username {
-      margin-bottom: 0px;
-      margin-left: 20px;
-    }
-
-    .message .username {
-      margin-bottom: 0px;
-      margin-right: 20px;
-    }
-
-    .message-inner {
-      max-width: 100%;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .message-content {
-      display: -webkit-box;
-      display: -ms-flexbox;
-      display: flex;
-      align-items: center;
-    }
-
-    .message-text {
-      background: #f6f9fb;
-      border-radius: 0.6rem;
-      padding: 1rem 1.25rem;
-      color: #95aac9;
-      font-size: 13px;
-    }
-
-    .message-content:not(:last-child) .message-text {
-      border-bottom-left-radius: 0.25rem;
-    }
-
-    .message.message-out {
-      flex-direction: row-reverse;
-    }
-
-    .message-out .message-content {
-      flex-direction: row-reverse;
-    }
-  </style>
- {% endblock %}
 {% block title %}Welcome | {% endblock %}
+
 {% block content %}
 <div class="container">
   <div class="hide-scrollbar flex-1 mb-3" id="chat-body">
     <div class="chat-body-inner">
       {% for m in messages %}
         <div class="message {% if m.engagement.name != 'Machine'%} message-out {%endif%}">
-          <p class="username">{{ m.engagement.name|default:'System' }}</p>
+          <p class="username">{{ m.engagement.name }}</p>
           <div class="message-inner">
             <div class="message-body">
               <div class="message-content">
                 <div class="message-text">
-                  <p class="mb-0">{{ m.content }}</p>
-                  {% if m.entity == 1 %}
-                    <div class="d-flex pt-4">
-                      <input
-                        type="button"
-                        class="btn btn-primary"
-                        value="Yes"
-                        id="accept"
-                      ></input>
-                      <input
-                        type="button"
-                        class="btn btn-danger mx-2"
-                        value="No"
-                        id="denial"
-                      ></input>
-                    </div>
+                  <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                  {% if m.entity == "yes-no" %}
+                    {% if not m.answer %}
+                      <div class="d-flex pt-4" id="{{m.id}}">
+                        <input type="radio" class="btn-check" id="{{m.id}}-yes" name="yes-no" value="yes">
+                        <label class="btn btn-primary" for="{{m.id}}-yes">Yes</label>
+                
+                        <input type="radio" class="btn-check" id="{{m.id}}-no" name="yes-no" value="no">
+                        <label class="btn mx-2 btn-danger" for="{{m.id}}-no">No</label>
+                      </div>
+                    {% endif %}
                   {% endif %}
                 </div>
               </div>
@@ -106,118 +38,42 @@
     <div class="input-group mb-3">
       <textarea id="chat-message-input" class="form-control p-2" placeholder="Type your message..."></textarea>
     </div>
-    <input type="button" class="btn btn-primary " value="Send" id="chat-message-submit"></input>
-    <input
-      type="hidden"
-      value="{{engagement_id|default:''}}"
-      id="chat-engagement-input"
-    />
+
+    <div class="entities-type mb-2">
+      {% for entity in default_entities_types %}
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="radio"
+            name="entities-type"
+            value="{{entity.id}}"
+            id="{{entity.id}}"
+            {% if entity.id == 'text' %} checked{% endif %}
+          />
+          <label class="form-check-label" for="{{entity.id}}">
+            {{entity.label}}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <input type="button" class="btn btn-primary" value="Send" id="chat-message-submit"/>
+    <input type="hidden" value="{{engagement_id|default:''}}" id="chat-engagement-input"/>
   </div>
 </div>
-{{ room.uuid|json_script:"room_id" }} {% endblock %} {% block script %}
+{{ room.uuid|json_script:"room_id" }} {% endblock %}
+{% block script %}
 <script>
   const roomId = JSON.parse(document.getElementById('room_id').textContent);
-
-  const messageBox = (engagement_name, message) => {
-    return `
-      <div class="message d-flex ${engagement_name != 'Machine' ? 'message-out' : ''}">
-        <p class="username">${engagement_name || 'System'}</p>
-        <div class="message-inner">
-          <div class="message-body">
-            <div class="message-content">
-              <div class="message-text">
-                <p class="mb-0">${message }</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  }
-
-  const yesNoQuestionBox = (engagement_name, message) => {
-    return `
-      <div class="message d-flex ${engagement_name != 'Machine' ? 'message-out' : ''}">
-        <p class="username">${engagement_name || 'System'}</p>
-        <div class="message-inner">
-          <div class="message-body">
-            <div class="message-content">
-              <div class="message-text">
-                <p class="mb-0">${message }</p>
-                <div class="d-flex pt-4">
-                  <input
-                    type="button"
-                    class="btn btn-primary"
-                    value="Yes"
-                    id="accept"
-                    name="accept"
-                  ></input>
-                  <input
-                    type="button"
-                    class="btn btn-danger mx-2"
-                    value="No"
-                    id="denial"
-                    name="denial"
-                  ></input>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  }
 
   const chatSocket = new WebSocket(
     `ws://${window.location.host}/ws/chat/${roomId}/`
   );
 
-  scrollToBottom();
-
   chatSocket.onmessage = function (e) {
     const data = JSON.parse(e.data);
     if (data.message) {
-      if (data.entity === 'yes_no') {
-        document.querySelector('#chat-body').innerHTML += yesNoQuestionBox(
-          data.engagement_name,
-          data.message
-        );
-
-        $(`input[type=button][id=accept][name=accept]`).on('click', function() {
-          const engagementInputDom = document.querySelector('#chat-engagement-input');
-          const engagementId = engagementInputDom.value;
-      
-          // chatSocket.send(
-          //  JSON.stringify({
-          //    message_id: 1,
-          //    room_id: roomId,
-          //    engagement_id: engagementId,
-          //    accepted: true
-          //  })
-          // );
-        })
-
-        $(`input[type=button][id=denial][name=denial]`).on('click', function() {
-          const engagementInputDom = document.querySelector('#chat-engagement-input');
-          const engagementId = engagementInputDom.value;
-      
-          // chatSocket.send(
-          //  JSON.stringify({
-          //    message_id: 1,
-          //    room_id: roomId,
-          //    engagement_id: engagementId,
-          //    accepted: false
-          //  })
-          // );
-        })
-      }
-
-      if (data.entity === 'text') {
-        document.querySelector('#chat-body').innerHTML += messageBox(
-          data.engagement_name,
-          data.message
-        );
-      }
+      renderMessage(data)
 
       scrollToBottom();
     } else {
@@ -237,24 +93,66 @@
   };
 
   document.querySelector('#chat-message-submit').onclick = function (e) {
-    const messageInputDom = document.querySelector('#chat-message-input');
-    const engagementInputDom = document.querySelector('#chat-engagement-input');
-    const message = messageInputDom.value;
-    const engagementId = engagementInputDom.value;
+    const message = $('#chat-message-input').val(),
+          engagementId= $('#chat-engagement-input').val(),
+          entity = $('input[name="entities-type"]:checked').val(),
+          params = {message, roomId, engagementId, entity}
 
-    chatSocket.send(
-      JSON.stringify({
-        message: message,
-        room_id: roomId,
-        engagement_id: engagementId,
-      })
-    );
-    messageInputDom.value = '';
+    sendData(params)
   };
+
+  const renderMessage = (data) => {
+    switch(data.entity) {
+      case "yes-no":
+        document.querySelector('#chat-body').innerHTML += yesNoQuestionBox(data);
+
+        // Hide the yes/no buttons
+        if (data.answer) {
+          $(`div[id=${data.question_id}]`).css({"display": "none"})
+        } else {
+          // Add event for yes/no question
+          element = $(`div[id=${data.message_id}]`)
+          element.find(`input[type=radio][name=yes-no]`).on('change', function() {
+            value = $('input[name="yes-no"]:checked').val()
+            const message = value,
+                  room_id = data.room_id,
+                  question_id = data.message_id
+                  engagementId= $('#chat-engagement-input').val(),
+                  entity = data.entity,
+                  answer = value,
+                  params = {message, roomId, engagementId, entity, answer, question_id};
+            sendData(params);
+          })
+        }
+
+        break;
+
+      default:
+        document.querySelector('#chat-body').innerHTML += textMessageBox(data);
+        return;
+    }
+  }
+
+
+  const sendData = (params = {}) => {
+    const paramsToString = JSON.stringify({
+      message: params.message,
+      room_id: params.roomId,
+      engagement_id: params.engagementId,
+      entity: params.entity,
+      ...(params.answer ? {answer: params.answer} : {}),
+      ...(params.question_id ? {question_id: params.question_id} : {}),
+    })
+
+    chatSocket.send(paramsToString);
+    $('#chat-message-input').val("");
+  }
 
   function scrollToBottom() {
     let objDiv = document.getElementById("chat-body");
     objDiv.scrollTo({top: objDiv.scrollHeight, behavior: 'smooth'});
   }
+
+  scrollToBottom();
 </script>
 {% endblock %}

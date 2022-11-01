@@ -1,14 +1,11 @@
 import json
-import random
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 # Import the Message model
 from .models import Room, Message, Engagement
 
-SYSTEM_ID = "4044d2e7ff0e4d769d5632b3f33459bc"
-
-the_scripts = ['text','yes_no']
+SYSTEM_ID = "f92f893d24b943a093a6ab569a502c05"
 
 # prints a random value from the list
 list_index = [0, 1]
@@ -40,13 +37,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = data["message"]
         engagement_id = data["engagement_id"] if data["engagement_id"] else SYSTEM_ID
         room_id = data["room_id"]
+        entity = data["entity"]
+
+        # The answer from Patient
+        answer = data["answer"] if "answer" in data else None
+
+        # The question id
+        question_id = data["question_id"] if "question_id" in data else None
+
+        if answer:
+            await self.update_message(question_id, answer)
 
         engagement = await self.get_engagement_by_id(engagement_id)
-
-        select_index = random.choice(list_index)
-        entity = the_scripts[select_index]
-        
-        await self.save_message(room_id, message, engagement, select_index)
+        message_id = await self.new_message(room_id, message, engagement, entity, answer)
         
         # Send message to room group
         await self.channel_layer.group_send(
@@ -57,6 +60,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "engagement_name": engagement.name,
                 "room_id": room_id,
                 "entity": entity,
+                "message_id": message_id,
+                "answer": answer,
+                "question_id": question_id,
             }
         )
 
@@ -66,6 +72,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         engagement_name = event["engagement_name"]
         room_id = event["room_id"]
         entity =  event["entity"]
+        message_id = event["message_id"]
+        answer =  event["answer"]
+        question_id =  event["question_id"]
 
         # Send message to WebSocket
         await self.send(
@@ -74,6 +83,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "engagement_name": engagement_name,
                 "room_id": room_id,
                 "entity": entity,
+                "message_id": message_id,
+                "answer": answer,
+                "question_id": question_id,
             })
         )
 
@@ -82,11 +94,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return Engagement.objects.get(uuid=engagement_id)
 
     @sync_to_async
-    def save_message(self, room_id, message, engagement, entity):
+    def new_message(self, room_id, message, engagement, entity, answer):
         room = Room.objects.get(uuid=room_id)
-        Message.objects.create(
+        new_message = Message.objects.create(
             engagement=engagement,
             room=room,
             content=message,
             entity = entity,
+            answer = answer
         )
+
+        return new_message.id
+
+    @sync_to_async
+    def update_message(self, id, answer):
+        message = Message.objects.get(pk=id)
+        message.answer = answer
+        message.save()
