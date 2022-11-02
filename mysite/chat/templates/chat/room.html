@@ -23,7 +23,7 @@
                           id="{{m.id}}-yes"
                           name="yes-no"
                           value="yes"
-                          onchange="handleAnswer({{m.id}}, 'yes')"
+                          onchange="handleAnswer({{m.id}}, 'yes', {{m.entity}})"
                         >
                         <label class="btn btn-primary" for="{{m.id}}-yes">Yes</label>
                 
@@ -33,7 +33,7 @@
                           id="{{m.id}}-no"
                           name="yes-no"
                           value="no"
-                          onchange="handleAnswer({{m.id}}, 'no')"
+                          onchange="handleAnswer({{m.id}}, 'no', {{m.entity}})"
                         >
                         <label class="btn mx-2 btn-danger" for="{{m.id}}-no">No</label>
                       </div>
@@ -147,9 +147,8 @@
     }
   }
 
-  function handleAnswer(id, value) {
-    const entity = $('input[name="entities-type"]:checked').val(),
-      message = value,
+  function handleAnswer(id, value, entity) {
+    const message = value,
       room_id = room_id,
       question_id = id
       engagementId= $('#chat-engagement-input').val(),
