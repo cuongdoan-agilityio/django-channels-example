@@ -40,18 +40,48 @@ const yesNoQuestionBox = (data) => {
 }
 
 const textMessageBox = (data) => {
-  return `
-    <div class="message d-flex ${data.engagement_name != 'Machine' ? 'message-out' : ''}">
-      <p class="username">${data.engagement_name || 'Machine'}</p>
-      <div class="message-inner">
-        <div class="message-body">
-          <div class="message-content">
-            <div class="message-text">
-              <p class="mb-0">${data.message }</p>
-            </div>
+  textTemplate = `<p class="mb-0">${data.message }</p>`;
+
+  return messageTemplate(data, textTemplate);
+}
+
+const renderDateTimePickerContent = (data) => {
+  if (!data.answer) {
+    return `
+      <p class="mb-0">${data.message }</p>
+      <div class='date position-relative' id="${data.message_id}">
+        <div class="pt-4" id="date-picker-${data.message_id}">
+          <!-- date picker -->
+          <input type="hidden" id="${data.message_id}-date">
+          <div id="${data.message_id}-datepicker"></div>
+
+          <div class="pt-4 d-flex">
+            <!-- time -->
+            <input
+              class="form-control"
+              type="time"
+              id="${data.message_id}-time"
+              name="${data.message_id}-time"
+              required
+            >
+            <input
+              id="${data.message_id}-next"
+              class="btn btn-primary mx-2"
+              type="button"
+              value="Next"
+            >
           </div>
         </div>
       </div>
-    </div>
-  `
+    `
+  } else {
+    return `
+      <p class="mb-0 text-capitalize">${data.answer}</p>
+    `
+  }
+}
+
+const dateTimePickerBox = (data) => {
+  dateTimePickertemplate = renderDateTimePickerContent(data)
+  return messageTemplate(data, dateTimePickertemplate);
 }

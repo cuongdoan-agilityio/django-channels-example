@@ -39,6 +39,11 @@
                       </div>
                     {% endif %}
                   {% endif %}
+
+                  {% if m.entity == "date-time" %}
+                    {% if not m.answer %}
+                    {% endif %}
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -137,6 +142,51 @@
                   params = {message, roomId, engagementId, entity, answer, question_id};
             sendData(params);
           })
+        }
+
+        break;
+
+      case "date-time":
+        document.querySelector('#chat-body').innerHTML += dateTimePickerBox(data);
+
+        // Hide the date picker buttons
+        if (data.answer) {
+          $(`div[id=${data.question_id}]`).css({"display": "none"});
+
+        } else {
+          // Add event for date time picker
+          element = $(`div[id=${data.message_id}]`);
+
+          $(`#${data.message_id}-datepicker`).datepicker({
+            container: element,
+            format: 'yyyy-mm-dd',
+            orientation: 'bottom auto',
+            autoclose: false,
+          }).on(
+            'changeDate',
+            (event) => {
+              $(`#${data.message_id}-date`).val(event.format());
+            }
+          );
+          
+          $(`#${data.message_id}-next`).on('click', () => {
+            const dateValue = $(`#${data.message_id}-date`).val();
+            const timeValue = $(`#${data.message_id}-time`).val();
+
+            if (dateValue && timeValue) {
+              value = `${dateValue} ${convertTime(timeValue)}`;
+
+              const message = value,
+                room_id = data.room_id,
+                question_id = data.message_id
+                engagementId= $('#chat-engagement-input').val(),
+                entity = data.entity,
+                answer = value,
+                params = {message, roomId, engagementId, entity, answer, question_id};
+
+              sendData(params);
+            }
+          });
         }
 
         break;
