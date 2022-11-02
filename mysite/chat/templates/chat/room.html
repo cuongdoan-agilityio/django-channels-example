@@ -42,6 +42,35 @@
 
                   {% if m.entity == "date-time" %}
                     {% if not m.answer %}
+                      <div class='date position-relative' id="{{m.id}}">
+                        <div class="pt-4" id="date-picker-{{m.id}}">
+                          <!-- date picker -->
+                          <input type="hidden" id="{{m.id}}-date">
+                          <div id="{{m.id}}-datepicker"></div>
+                
+                          <div class="pt-4 d-flex">
+                            <!-- time -->
+                            <input
+                              class="form-control"
+                              type="time"
+                              id="{{m.id}}-time"
+                              name="{{m.id}}-time"
+                              required
+                            >
+                            <input
+                              id="{{m.id}}-next"
+                              class="btn btn-primary mx-2"
+                              type="button"
+                              value="Next"
+                            >
+                          </div>
+                        </div>
+                      </div>
+                      <script>
+                        $(document).ready(function() {
+                          handleDateTime("{{m.id}}", "{{m.entity}}", "{{m.room.uuid}}");
+                        });
+                      </script>
                     {% endif %}
                   {% endif %}
                 </div>
@@ -197,7 +226,7 @@
     }
   }
 
-  function answerYesNo(id, value, entity) {
+  const answerYesNo = (id, value, entity) => {
     const message = value,
       room_id = room_id,
       question_id = id
@@ -208,6 +237,43 @@
     sendData(params);
   }
 
+  // TODO: need refactor code.
+  const handleDateTime = (id, entity, room) => {
+    element = $(`div[id=${id}]`);
+
+    $(`#${id}-datepicker`).datepicker({
+      container: element,
+      format: 'yyyy-mm-dd',
+      orientation: 'bottom auto',
+      autoclose: false,
+    }).on(
+      'changeDate',
+      (event) => {
+        $(`#${id}-date`).val(event.format());
+      }
+    );
+    
+    $(`#${id}-next`).on('click', () => {
+      const dateValue = $(`#${id}-date`).val();
+      const timeValue = $(`#${id}-time`).val();
+
+      if (dateValue && timeValue) {
+        value = `${dateValue} ${convertTime(timeValue)}`;
+
+        const message = value,
+          roomId = room,
+          question_id = id
+          engagementId= $('#chat-engagement-input').val(),
+          entity = entity,
+          answer = value,
+          params = {message, roomId, engagementId, entity, answer, question_id};
+
+        sendData(params);
+      }
+    });
+
+    scrollToBottom();
+  };
 
   const sendData = (params = {}) => {
     const paramsToString = JSON.stringify({
@@ -223,7 +289,7 @@
     $('#chat-message-input').val("");
   }
 
-  function scrollToBottom() {
+  const scrollToBottom = () => {
     let objDiv = document.getElementById("chat-body");
     objDiv.scrollTo({top: objDiv.scrollHeight, behavior: 'smooth'});
   }
