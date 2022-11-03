@@ -42,27 +42,68 @@
 
                   {% if m.entity == "date-time" %}
                     {% if not m.answer %}
-                      <div class='date position-relative' id="{{m.id}}">
-                        <div class="pt-4" id="date-picker-{{m.id}}">
+                      <div class='date position-relative pt-4' id="{{m.id}}">
+                        <p class="border-bottom">Choose A Date and Time:</p>
+                        <div class="pt-1" id="date-picker-{{m.id}}">
                           <!-- date picker -->
                           <input type="hidden" id="{{m.id}}-date">
                           <div id="{{m.id}}-datepicker"></div>
                 
-                          <div class="pt-4 d-flex">
-                            <!-- time -->
-                            <input
-                              class="form-control"
-                              type="time"
-                              id="{{m.id}}-time"
-                              name="{{m.id}}-time"
-                              required
-                            >
-                            <input
-                              id="{{m.id}}-next"
-                              class="btn btn-primary mx-2"
-                              type="button"
-                              value="Next"
-                            >
+                          <div class="pt-4">
+                            <div class="d-flex justify-content-between">
+                              <!-- time -->
+                              {% comment %} <input
+                                class="form-control"
+                                type="time"
+                                id="{{m.id}}-time"
+                                name="{{m.id}}-time"
+                                required
+                              > {% endcomment %}
+                              <input
+                                type="text"
+                                maxlength="5"
+                                placeholder="00:00"
+                                class="time-input form-control"
+                                onkeypress="return onlyNumber(event, this)"
+                                id="{{m.id}}-time"
+                                name="{{m.id}}-time"
+                                onchange="setError(this, '{{m.id}}-error')"
+                              />
+
+                              <!-- AM/PM -->
+                              <div class="btn-group btn-group-toggle radio-group ms-1" data-toggle="buttons">
+                                <input
+                                  type="radio"
+                                  class="btn-check"
+                                  name="{{m.id}}-meridian"
+                                  id="{{m.id}}-am"
+                                  autocomplete="off"
+                                  value="AM"
+                                  checked
+                                >
+                                <label class="btn btn-sm  radio-label" for="{{m.id}}-am">AM</label>
+                                
+                                <input
+                                  type="radio"
+                                  class="btn-check"
+                                  name="{{m.id}}-meridian"
+                                  id="{{m.id}}-pm"
+                                  autocomplete="off"
+                                  value="PM"
+                                >
+                                <label class="btn btn-sm radio-label" for="{{m.id}}-pm">PM</label>
+                              </div>
+
+                              <input
+                                id="{{m.id}}-next"
+                                class="btn btn-primary ms-1 btn-sm btn-next"
+                                type="button"
+                                value="Next"
+                              >
+                            </div>
+                            <div class="error text-danger d-none" id="{{m.id}}-error">
+                              Invalid time.
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -256,9 +297,10 @@
     $(`#${id}-next`).on('click', () => {
       const dateValue = $(`#${id}-date`).val();
       const timeValue = $(`#${id}-time`).val();
+      const meridian = $(`input[type='radio'][name='${id}-meridian']:checked`).val();
 
-      if (dateValue && timeValue) {
-        value = `${dateValue} ${convertTime(timeValue)}`;
+      if (dateValue && invalidTime(timeValue)) {
+        value = `${dateValue} ${timeValue} ${meridian}`;
 
         const message = value,
           roomId = room,

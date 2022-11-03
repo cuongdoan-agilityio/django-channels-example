@@ -59,3 +59,48 @@
 .message-out .message-content {
   flex-direction: row-reverse;
 }
+
+.datepicker.datepicker-inline .table-condensed {
+  top: 0;
+  left: 0;
+  margin: 0 auto;
+}
+
+.time-input {
+  max-width: 68px;
+  text-align: center;
+  border-radius: 10px !important;
+  border: 1px solid #E2E1E1;
+  background-color: #E2E1E1;
+}
+
+.radio-group {
+  background-color: #E2E1E1;
+  border-radius: 13px;
+  padding: 3px;
+  display: flex !important;
+  align-items: center;
+  align-content: center;
+}
+
+.btn-check + .radio-label,
+.btn-check + .radio-label {
+  width: 42px;
+  margin: 0 !important;
+}
+
+.btn-check:checked + .radio-label,
+.btn-check:active + .radio-label {
+  color: #000;
+  background-color: #fff;
+  border-radius: 10px !important;
+}
+
+.btn-check:checked + .radio-label :focus,
+.btn-check:active + .radio-label :focus {
+  box-shadow: 0 0 0 0.25rem rgb(130 138 145 / 50%);
+}
+
+.btn-next {
+  border-radius: 13px !important;
+}
