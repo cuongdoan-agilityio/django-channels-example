@@ -1,5 +1,6 @@
-const convertTime = (timeValue) => {
-  let timeSplit = timeValue.split(':'),
+const convertDateTime = (dateTimeValue) => {
+  let dateTimeSplit = dateTimeValue.split('T');
+  let timeSplit = dateTimeSplit[1].split(':'),
       hours,
       minutes,
       meridian;
@@ -20,7 +21,7 @@ const convertTime = (timeValue) => {
     meridian = 'PM';
   }
 
-  return `${hours}:${minutes} ${meridian}`;
+  return `${dateTimeSplit[0]} ${hours}:${minutes} ${meridian}`;
 }
 
 const onlyNumber = (evt, element) => {
@@ -61,4 +62,10 @@ const setError = (inputField, errorMessageSelector) => {
     // Hide error mesage
     $(`#${errorMessageSelector}`).addClass('d-none')
   }
+}
+
+const defaultDateTime = () => {
+  var currentdate = new Date();
+
+  return `${currentdate.toISOString().split('T')[0]}T12:00`;
 }

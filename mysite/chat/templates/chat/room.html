@@ -42,76 +42,20 @@
 
                   {% if m.entity == "date-time" %}
                     {% if not m.answer %}
-                      <div class='date position-relative pt-4' id="{{m.id}}">
-                        <p class="border-bottom">Choose A Date and Time:</p>
-                        <div class="pt-1" id="date-picker-{{m.id}}">
-                          <!-- date picker -->
-                          <input type="hidden" id="{{m.id}}-date">
-                          <div id="{{m.id}}-datepicker"></div>
-                
-                          <div class="pt-4">
-                            <div class="d-flex justify-content-between">
-                              <!-- time -->
-                              {% comment %} <input
-                                class="form-control"
-                                type="time"
-                                id="{{m.id}}-time"
-                                name="{{m.id}}-time"
-                                required
-                              > {% endcomment %}
-                              <input
-                                type="text"
-                                maxlength="5"
-                                placeholder="00:00"
-                                class="time-input form-control"
-                                onkeypress="return onlyNumber(event, this)"
-                                id="{{m.id}}-time"
-                                name="{{m.id}}-time"
-                                onchange="setError(this, '{{m.id}}-error')"
-                              />
-
-                              <!-- AM/PM -->
-                              <div class="btn-group btn-group-toggle radio-group ms-1" data-toggle="buttons">
-                                <input
-                                  type="radio"
-                                  class="btn-check"
-                                  name="{{m.id}}-meridian"
-                                  id="{{m.id}}-am"
-                                  autocomplete="off"
-                                  value="AM"
-                                  checked
-                                >
-                                <label class="btn btn-sm  radio-label" for="{{m.id}}-am">AM</label>
-                                
-                                <input
-                                  type="radio"
-                                  class="btn-check"
-                                  name="{{m.id}}-meridian"
-                                  id="{{m.id}}-pm"
-                                  autocomplete="off"
-                                  value="PM"
-                                >
-                                <label class="btn btn-sm radio-label" for="{{m.id}}-pm">PM</label>
-                              </div>
-
-                              <input
-                                id="{{m.id}}-next"
-                                class="btn btn-primary ms-1 btn-sm btn-next"
-                                type="button"
-                                value="Next"
-                              >
-                            </div>
-                            <div class="error text-danger d-none" id="{{m.id}}-error">
-                              Invalid time.
-                            </div>
-                          </div>
+                      <div class='date position-relative' id="{{m.id}}">
+                        <div class="pt-3 d-flex flex-column">
+                          <!-- time -->
+                          <input
+                            class="form-control"
+                            type="datetime-local"
+                            id="{{m.id}}-time"
+                            name="date-time"
+                            onkeydown="return false;"
+                            onchange="submitDateTime(this, '{{m.id}}', '{{m.entity}}', '{{m.room.uuid}}');"
+                          >
+                          <small id="datetime-help">Choose A Date and Time.</small>
                         </div>
                       </div>
-                      <script>
-                        $(document).ready(function() {
-                          handleDateTime("{{m.id}}", "{{m.entity}}", "{{m.room.uuid}}");
-                        });
-                      </script>
                     {% endif %}
                   {% endif %}
                 </div>
@@ -190,6 +134,7 @@
     sendData(params)
   };
 
+  // TODO: Need apply Event Delegation
   const renderMessage = (data) => {
     switch(data.entity) {
       case "yes-no":
@@ -224,27 +169,12 @@
           $(`div[id=${data.question_id}]`).css({"display": "none"});
 
         } else {
-          // Add event for date time picker
           element = $(`div[id=${data.message_id}]`);
+          element.find(`#${data.message_id}-time`).on('change', function(event) {
+            let dateTimeValue = $(this).val();
 
-          $(`#${data.message_id}-datepicker`).datepicker({
-            container: element,
-            format: 'yyyy-mm-dd',
-            orientation: 'bottom auto',
-            autoclose: false,
-          }).on(
-            'changeDate',
-            (event) => {
-              $(`#${data.message_id}-date`).val(event.format());
-            }
-          );
-          
-          $(`#${data.message_id}-next`).on('click', () => {
-            const dateValue = $(`#${data.message_id}-date`).val();
-            const timeValue = $(`#${data.message_id}-time`).val();
-
-            if (dateValue && timeValue) {
-              value = `${dateValue} ${convertTime(timeValue)}`;
+            if (dateTimeValue) {
+              value = convertDateTime(dateTimeValue);
 
               const message = value,
                 room_id = data.room_id,
@@ -256,13 +186,14 @@
 
               sendData(params);
             }
-          });
+          })
         }
 
         break;
 
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
+
         return;
     }
   }
@@ -279,40 +210,22 @@
   }
 
   // TODO: need refactor code.
-  const handleDateTime = (id, entity, room) => {
-    element = $(`div[id=${id}]`);
+  const submitDateTime = (element, id, entity, room) => {
+    let dateTimeValue = element.value;
 
-    $(`#${id}-datepicker`).datepicker({
-      container: element,
-      format: 'yyyy-mm-dd',
-      orientation: 'bottom auto',
-      autoclose: false,
-    }).on(
-      'changeDate',
-      (event) => {
-        $(`#${id}-date`).val(event.format());
-      }
-    );
-    
-    $(`#${id}-next`).on('click', () => {
-      const dateValue = $(`#${id}-date`).val();
-      const timeValue = $(`#${id}-time`).val();
-      const meridian = $(`input[type='radio'][name='${id}-meridian']:checked`).val();
+    if (dateTimeValue) {
+      value = convertDateTime(dateTimeValue);
 
-      if (dateValue && invalidTime(timeValue)) {
-        value = `${dateValue} ${timeValue} ${meridian}`;
+      const message = value,
+        roomId = room,
+        question_id = id
+        engagementId= $('#chat-engagement-input').val(),
+        entity = entity,
+        answer = value,
+        params = {message, roomId, engagementId, entity, answer, question_id};
 
-        const message = value,
-          roomId = room,
-          question_id = id
-          engagementId= $('#chat-engagement-input').val(),
-          entity = entity,
-          answer = value,
-          params = {message, roomId, engagementId, entity, answer, question_id};
-
-        sendData(params);
-      }
-    });
+      sendData(params);
+    }
 
     scrollToBottom();
   };
@@ -336,6 +249,11 @@
     objDiv.scrollTo({top: objDiv.scrollHeight, behavior: 'smooth'});
   }
 
+  const setDefaultDateTime = () => {
+    $("input[name=date-time]").attr("value", defaultDateTime());
+  }
+
   scrollToBottom();
+  setDefaultDateTime()
 </script>
 {% endblock %}

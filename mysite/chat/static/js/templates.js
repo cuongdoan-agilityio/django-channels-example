@@ -49,64 +49,18 @@ const renderDateTimePickerContent = (data) => {
   if (!data.answer) {
     return `
       <p class="mb-0">${data.message }</p>
-      <div class='date position-relative pt-4' id="${data.message_id}">
-        <p class="border-bottom">Choose A Date and Time:</p>
-        
-        <div class="pt-1" id="date-picker-${data.message_id}">
-          <!-- date picker -->
-          <input type="hidden" id="${data.message_id}-date">
-          <div id="${data.message_id}-datepicker"></div>
-
-          <div class="pt-4">
-
-            <div class="d-flex justify-content-between">
-              <!-- time -->
-              <input
-                type="text"
-                maxlength="5"
-                placeholder="00:00"
-                class="time-input form-control"
-                onkeypress="return onlyNumber(event, this)"
-                id="${data.message_id}-time"
-                name="${data.message_id}-time"
-                onchange="setError(this, '${data.message_id}-error')"
-              />
-
-              <!-- AM/PM -->
-              <div class="btn-group btn-group-toggle radio-group ms-1" data-toggle="buttons">
-                <input
-                  type="radio"
-                  class="btn-check"
-                  name="${data.message_id}-meridian"
-                  id="${data.message_id}-am"
-                  autocomplete="off"
-                  value="AM"
-                  checked
-                >
-                <label class="btn btn-sm  radio-label" for="${data.message_id}-am">AM</label>
-                
-                <input
-                  type="radio"
-                  class="btn-check"
-                  name="${data.message_id}-meridian"
-                  id="${data.message_id}-pm"
-                  autocomplete="off"
-                  value="PM"
-                >
-                <label class="btn btn-sm radio-label" for="${data.message_id}-pm">PM</label>
-              </div>
-
-              <input
-                id="${data.message_id}-next"
-                class="btn btn-primary ms-1 btn-sm btn-next"
-                type="button"
-                value="Next"
-              >
-            </div>
-            <div class="error text-danger d-none" id="${data.message_id}-error">
-              Invalid time.
-            </div>
-          </div>
+      <div class='date position-relative' id="${data.message_id}">
+        <div class="pt-3 d-flex flex-column">
+          <!-- Date time-->
+          <input
+            class="form-control"
+            type="datetime-local"
+            id="${data.message_id}-time"
+            name="${data.message_id}-time"
+            value="${defaultDateTime()}"
+            onkeydown="return false;"
+          >
+          <small id="datetime-help">Choose A Date and Time.</small>
         </div>
       </div>
     `
