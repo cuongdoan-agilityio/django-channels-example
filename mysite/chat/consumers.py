@@ -4,6 +4,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 # Import the Message model
 from .models import Room, Message, Engagement
+from .constants import topics_learn
 
 SYSTEM_ID = "f92f893d24b943a093a6ab569a502c05"
 
@@ -75,6 +76,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_id = event["message_id"]
         answer =  event["answer"]
         question_id =  event["question_id"]
+        learn_more_options = topics_learn
+
+        if answer and entity == 'learn-more':
+            # Send message to WebSocket
+            await self.send(
+                text_data=json.dumps({
+                    "message": message,
+                    "engagement_name": engagement_name,
+                    "room_id": room_id,
+                    "entity": entity,
+                    "message_id": message_id,
+                    "answer": answer,
+                    "question_id": question_id,
+                    "learn_more_options": learn_more_options,
+                })
+            )
+
+            for topic in topics_learn:
+                if topic.value == answer:
+                    message = topic.message
+
+            await self.send(
+                text_data=json.dumps({
+                    "message": message,
+                    "engagement_name": engagement_name,
+                    "room_id": room_id,
+                    "entity": "text",
+                    "message_id": message_id,
+                    "answer": answer,
+                    "question_id": question_id,
+                })
+            )
+
+            return
 
         # Send message to WebSocket
         await self.send(
@@ -86,6 +121,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message_id": message_id,
                 "answer": answer,
                 "question_id": question_id,
+                "learn_more_options": learn_more_options,
             })
         )
 

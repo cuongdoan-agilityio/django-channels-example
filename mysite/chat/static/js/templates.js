@@ -71,7 +71,57 @@ const renderDateTimePickerContent = (data) => {
   }
 }
 
+const renderLearnMoreContent = (data) => {
+  let learnMoreOption = renderLearnMoreList(data);
+  if (!data.answer) {
+    return `
+      <p class="mb-0">${data.message }</p>
+      <div class="pt-4 position-relative" id="${data.message_id}">
+        <div class="pt-3 d-flex topics flex-column align-items-start">
+          ${learnMoreOption}
+        </div>
+      </div>
+    `
+  } else {
+    return `
+      <p class="mb-0 text-capitalize">${data.answer}</p>
+    `
+  }
+}
+
 const dateTimePickerBox = (data) => {
   dateTimePickertemplate = renderDateTimePickerContent(data)
   return messageTemplate(data, dateTimePickertemplate);
 }
+
+const learnMoreBox = (data) => {
+  contentTemplate = renderLearnMoreContent(data)
+  return messageTemplate(data, contentTemplate);
+}
+
+const renderLearnMoreList = (data) => {
+  let el = '';
+
+  (data.learn_more_options || []).map((item) => {
+    el += `
+    <input
+      type="checkbox"
+      class="btn-check"
+      id="${data.message_id}-${item.id}"
+      name="learn-more"
+      value="${item.value}"
+    >
+    <label
+      class="btn btn-primary my-1"
+      for="${data.message_id}-${item.id}"
+    >
+      <i class="bi bi-check-circle"></i>
+      <span class="ms-2">
+        ${item.title}
+      </span>
+    </label>
+    `
+  })
+
+  return el;
+};

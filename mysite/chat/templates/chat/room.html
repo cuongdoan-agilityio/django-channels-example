@@ -57,6 +57,33 @@
                       </div>
                     {% endif %}
                   {% endif %}
+
+                  {% if m.entity == "learm-more" %}
+                    {% if not m.answer %}
+                      <div class='date position-relative' id="{{m.id}}">
+                        <div class="pt-3 d-flex topics flex-column align-items-start">
+                          {% for item in learn_more_options %}
+                            <input
+                              type="checkbox"
+                              class="btn-check"
+                              id="{{m.id}}-{{item.id}}"
+                              name="learn-more"
+                              value="{{item.value}}"
+                            >
+                            <label
+                              class="btn btn-primary topics-label my-1"
+                              for="{{m.id}}-{{item.id}}"
+                            >
+                              <i class="bi bi-check-circle"></i>
+                              <span class="ms-2">
+                                {{item.title}}
+                              </span>
+                            </label>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% endif %}
+                  {% endif %}
                 </div>
               </div>
             </div>
@@ -137,21 +164,38 @@
       case "yes-no":
         document.querySelector('#chat-body').innerHTML += yesNoQuestionBox(data);
 
+        if (data.answer) {
+          $(`div[id=${data.question_id}]`).css({"display": "none"})
+        }
+
         break;
 
       case "date-time":
         document.querySelector('#chat-body').innerHTML += dateTimePickerBox(data);
+
+        if (data.answer) {
+          $(`div[id=${data.question_id}]`).css({"display": "none"})
+        }
+
+        break;
+
+      case "learm-more":
+        document.querySelector('#chat-body').innerHTML += learnMoreBox(data);
 
         break;
 
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
 
-        break;
-    }
+        console.log(data);
 
-    if (data.answer) {
-      $(`div[id=${data.question_id}]`).css({"display": "none"})
+        if (data.answer && data.entity !== "learm-more") {
+          $(`div[id=${data.question_id}]`).css({"display": "none"});
+
+          console.log('======================================')
+        }
+
+        break;
     }
   }
 
@@ -219,8 +263,27 @@
     });
   }
 
+  const handleLearnMore = () => {
+    $('#chat-body').on('change', 'input[type=checkbox][name=learn-more]', function (event) {
+      event.preventDefault();
+
+      const value = $(this).val(),
+        parentEl = $(this).parent().parent(),
+        id = parentEl.attr('id'),
+        message = value,
+        question_id = id,
+        engagementId= $('#chat-engagement-input').val(),
+        entity = 'text',
+        answer = value,
+        params = {message, roomId, engagementId, entity, answer, question_id};
+
+      sendData(params);
+    });
+  }
+
   handleYesNo();
   handleDateTime();
+  handleLearnMore();
   scrollToBottom();
   setDefaultDateTime();
 </script>
