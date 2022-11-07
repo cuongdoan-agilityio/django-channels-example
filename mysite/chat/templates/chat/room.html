@@ -143,20 +143,6 @@
         // Hide the yes/no buttons
         if (data.answer) {
           $(`div[id=${data.question_id}]`).css({"display": "none"})
-        } else {
-          // Add event for yes/no question
-          element = $(`div[id=${data.message_id}]`)
-          element.find(`input[type=radio][name=yes-no]`).on('change', function() {
-            value = $('input[name="yes-no"]:checked').val()
-            const message = value,
-                  room_id = data.room_id,
-                  question_id = data.message_id
-                  engagementId= $('#chat-engagement-input').val(),
-                  entity = data.entity,
-                  answer = value,
-                  params = {message, roomId, engagementId, entity, answer, question_id};
-            sendData(params);
-          })
         }
 
         break;
@@ -253,7 +239,26 @@
     $("input[name=date-time]").attr("value", defaultDateTime());
   }
 
+  const handleYesNo = () => {
+    $('#chat-body').on('click', 'input[type=radio][name=yes-no]', function (event) {
+      event.preventDefault();
+
+      const parentEl = $(this).parent(),
+        id = parentEl.attr('id'),
+        entity = 'text',
+        value = $(this).val(),
+        message = value,
+        question_id = id,
+        engagementId= $('#chat-engagement-input').val(),
+        answer = value,
+        params = {message, roomId, engagementId, entity, answer, question_id};
+      
+      sendData(params);
+    });
+  }
+
+  handleYesNo();
   scrollToBottom();
-  setDefaultDateTime()
+  setDefaultDateTime();
 </script>
 {% endblock %}

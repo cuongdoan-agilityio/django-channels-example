@@ -50,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         engagement = await self.get_engagement_by_id(engagement_id)
         message_id = await self.new_message(room_id, message, engagement, entity, answer)
-        
+
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -101,7 +101,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             room=room,
             content=message,
             entity = entity,
-            answer = answer
         )
 
         return new_message.id
