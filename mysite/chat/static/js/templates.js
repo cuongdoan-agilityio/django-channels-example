@@ -56,7 +56,7 @@ const renderDateTimePickerContent = (data) => {
             class="form-control"
             type="datetime-local"
             id="${data.message_id}-time"
-            name="${data.message_id}-time"
+            name="date-time"
             value="${defaultDateTime()}"
             onkeydown="return false;"
           >

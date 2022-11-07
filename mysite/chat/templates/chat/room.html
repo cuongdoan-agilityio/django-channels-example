@@ -51,7 +51,6 @@
                             id="{{m.id}}-time"
                             name="date-time"
                             onkeydown="return false;"
-                            onchange="submitDateTime(this, '{{m.id}}', '{{m.entity}}', '{{m.room.uuid}}');"
                           >
                           <small id="datetime-help">Choose A Date and Time.</small>
                         </div>
@@ -106,8 +105,7 @@
   chatSocket.onmessage = function (e) {
     const data = JSON.parse(e.data);
     if (data.message) {
-      renderMessage(data)
-
+      renderMessage(data);
       scrollToBottom();
     } else {
       alert('The message was empty!');
@@ -134,87 +132,28 @@
     sendData(params)
   };
 
-  // TODO: Need apply Event Delegation
   const renderMessage = (data) => {
     switch(data.entity) {
       case "yes-no":
         document.querySelector('#chat-body').innerHTML += yesNoQuestionBox(data);
-
-        // Hide the yes/no buttons
-        if (data.answer) {
-          $(`div[id=${data.question_id}]`).css({"display": "none"})
-        }
 
         break;
 
       case "date-time":
         document.querySelector('#chat-body').innerHTML += dateTimePickerBox(data);
 
-        // Hide the date picker buttons
-        if (data.answer) {
-          $(`div[id=${data.question_id}]`).css({"display": "none"});
-
-        } else {
-          element = $(`div[id=${data.message_id}]`);
-          element.find(`#${data.message_id}-time`).on('change', function(event) {
-            let dateTimeValue = $(this).val();
-
-            if (dateTimeValue) {
-              value = convertDateTime(dateTimeValue);
-
-              const message = value,
-                room_id = data.room_id,
-                question_id = data.message_id
-                engagementId= $('#chat-engagement-input').val(),
-                entity = data.entity,
-                answer = value,
-                params = {message, roomId, engagementId, entity, answer, question_id};
-
-              sendData(params);
-            }
-          })
-        }
-
         break;
 
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
 
-        return;
-    }
-  }
-
-  const answerYesNo = (id, value, entity) => {
-    const message = value,
-      room_id = room_id,
-      question_id = id
-      engagementId= $('#chat-engagement-input').val(),
-      answer = value,
-      params = {message, roomId, engagementId, entity, answer, question_id};
-
-    sendData(params);
-  }
-
-  // TODO: need refactor code.
-  const submitDateTime = (element, id, entity, room) => {
-    let dateTimeValue = element.value;
-
-    if (dateTimeValue) {
-      value = convertDateTime(dateTimeValue);
-
-      const message = value,
-        roomId = room,
-        question_id = id
-        engagementId= $('#chat-engagement-input').val(),
-        entity = entity,
-        answer = value,
-        params = {message, roomId, engagementId, entity, answer, question_id};
-
-      sendData(params);
+        break;
     }
 
-    scrollToBottom();
-  };
+    if (data.answer) {
+      $(`div[id=${data.question_id}]`).css({"display": "none"})
+    }
+  }
 
   const sendData = (params = {}) => {
     const paramsToString = JSON.stringify({
@@ -257,7 +196,31 @@
     });
   }
 
+  const handleDateTime = () => {
+    $('#chat-body').on('change', 'input[type=datetime-local][name=date-time]', function (event) {
+      event.preventDefault();
+      let dateTimeValue = $(this).val();
+
+      if (dateTimeValue) {
+        const value = convertDateTime(dateTimeValue),
+          parentEl = $(this).parent().parent(),
+          id = parentEl.attr('id'),
+          message = value,
+          question_id = id
+          engagementId= $('#chat-engagement-input').val(),
+          entity = 'text',
+          answer = value,
+          params = {message, roomId, engagementId, entity, answer, question_id};
+  
+        sendData(params);
+      }
+  
+      scrollToBottom();
+    });
+  }
+
   handleYesNo();
+  handleDateTime();
   scrollToBottom();
   setDefaultDateTime();
 </script>
