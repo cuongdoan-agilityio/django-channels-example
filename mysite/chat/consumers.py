@@ -6,7 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Room, Message, Engagement
 from .constants import topics_learn
 
-SYSTEM_ID = "f92f893d24b943a093a6ab569a502c05"
+SYSTEM_ID = "0a97af48ae414a8b844b77e9b905a4fe"
 
 # prints a random value from the list
 list_index = [0, 1]
@@ -37,6 +37,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         message = data["message"]
         engagement_id = data["engagement_id"] if data["engagement_id"] else SYSTEM_ID
+
+        is_system_message = True
+        if data["engagement_id"]:
+            is_system_message = False
+
         room_id = data["room_id"]
         entity = data["entity"]
 
@@ -50,7 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.update_message(question_id, answer)
 
         engagement = await self.get_engagement_by_id(engagement_id)
-        message_id = await self.new_message(room_id, message, engagement, entity, answer)
+        message_id = await self.new_message(room_id, message, engagement, entity, answer, is_system_message)
 
         # Send message to room group
         await self.channel_layer.group_send(
@@ -64,6 +69,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message_id": message_id,
                 "answer": answer,
                 "question_id": question_id,
+                "is_system_message": is_system_message,
             }
         )
 
@@ -77,39 +83,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         answer =  event["answer"]
         question_id =  event["question_id"]
         learn_more_options = topics_learn
+        is_system_message = event["is_system_message"]
 
-        if answer and entity == 'learn-more':
-            # Send message to WebSocket
-            await self.send(
-                text_data=json.dumps({
-                    "message": message,
-                    "engagement_name": engagement_name,
-                    "room_id": room_id,
-                    "entity": entity,
-                    "message_id": message_id,
-                    "answer": answer,
-                    "question_id": question_id,
-                    "learn_more_options": learn_more_options,
-                })
-            )
-
-            for topic in topics_learn:
-                if topic.value == answer:
-                    message = topic.message
-
-            await self.send(
-                text_data=json.dumps({
-                    "message": message,
-                    "engagement_name": engagement_name,
-                    "room_id": room_id,
-                    "entity": "text",
-                    "message_id": message_id,
-                    "answer": answer,
-                    "question_id": question_id,
-                })
-            )
-
-            return
+        if entity == "learn-more":
+            answer =  answer.split(",")
 
         # Send message to WebSocket
         await self.send(
@@ -122,6 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "answer": answer,
                 "question_id": question_id,
                 "learn_more_options": learn_more_options,
+                "is_system_message": is_system_message,
             })
         )
 
@@ -130,13 +108,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return Engagement.objects.get(uuid=engagement_id)
 
     @sync_to_async
-    def new_message(self, room_id, message, engagement, entity, answer):
+    def new_message(self, room_id, message, engagement, entity, answer, system_message):
         room = Room.objects.get(uuid=room_id)
         new_message = Message.objects.create(
             engagement=engagement,
             room=room,
             content=message,
             entity = entity,
+            system_message = system_message
         )
 
         return new_message.id
@@ -144,5 +123,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @sync_to_async
     def update_message(self, id, answer):
         message = Message.objects.get(pk=id)
+        if message.entity == "learn-more":
+            answer = f"{message.answer},{answer}"
+
         message.answer = answer
         message.save()

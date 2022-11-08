@@ -29,6 +29,8 @@ class Message(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     answer = models.TextField(blank=True, null=True, default="")
     entity = models.TextField(default="text")
+    viewed = models.BooleanField(db_index=True, default=False)
+    system_message = models.BooleanField(db_index=True, default=True)
 
     class Meta:
         ordering = ("date_added",)

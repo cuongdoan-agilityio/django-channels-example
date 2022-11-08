@@ -13,9 +13,9 @@
             <div class="message-body">
               <div class="message-content">
                 <div class="message-text">
-                  <p class="mb-0 text-capitalize">{{ m.content }}</p>
                   {% if m.entity == "yes-no" %}
                     {% if not m.answer %}
+                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
                       <div class="pt-4 position-relative" id="{{m.id}}">
                         <input
                           type="radio"
@@ -37,11 +37,14 @@
                         >
                         <label class="btn mx-2 btn-danger" for="{{m.id}}-no">No</label>
                       </div>
+                    {% else %}
+                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
                     {% endif %}
                   {% endif %}
 
                   {% if m.entity == "date-time" %}
                     {% if not m.answer %}
+                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
                       <div class='date position-relative' id="{{m.id}}">
                         <div class="pt-3 d-flex flex-column">
                           <!-- time -->
@@ -55,34 +58,68 @@
                           <small id="datetime-help">Choose A Date and Time.</small>
                         </div>
                       </div>
+                    {% else %}
+                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
                     {% endif %}
                   {% endif %}
 
                   {% if m.entity == "learm-more" %}
-                    {% if not m.answer %}
+                    {% if m.system_message %}
+                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
                       <div class='date position-relative' id="{{m.id}}">
                         <div class="pt-3 d-flex topics flex-column align-items-start">
                           {% for item in learn_more_options %}
-                            <input
-                              type="checkbox"
-                              class="btn-check"
-                              id="{{m.id}}-{{item.id}}"
-                              name="learn-more"
-                              value="{{item.value}}"
-                            >
-                            <label
-                              class="btn btn-primary topics-label my-1"
-                              for="{{m.id}}-{{item.id}}"
-                            >
-                              <i class="bi bi-check-circle"></i>
-                              <span class="ms-2">
-                                {{item.title}}
-                              </span>
-                            </label>
+                            {% if item.id not in m.answer %}
+                              <input
+                                type="checkbox"
+                                class="btn-check"
+                                id="{{m.id}}-{{item.id}}"
+                                name="learn-more"
+                                value="{{item.id}}"
+                              >
+                              <label
+                                class="btn btn-primary topics-label my-1"
+                                for="{{m.id}}-{{item.id}}"
+                              >
+                                <i class="bi bi-check-circle"></i>
+                                <span class="ms-2">
+                                  {{item.title}}
+                                </span>
+                              </label>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% else %}
+                      <div class='date position-relative' id="{{m.id}}">
+                        <div class="d-flex topics flex-column align-items-start">
+                          {% for item in learn_more_options %}
+                            {% if item.id == m.content %}
+                              <input
+                                type="checkbox"
+                                class="btn-check"
+                                id="{{m.id}}-{{item.id}}"
+                                name="learn-more"
+                                value="{{item.id}}"
+                              >
+                              <label
+                                class="btn btn-outline-primary topics-label my-1"
+                                for="{{m.id}}-{{item.id}}"
+                              >
+                                <i class="bi bi-check-circle"></i>
+                                <span class="ms-2">
+                                  {{item.title}}
+                                </span>
+                              </label>
+                            {% endif %}
                           {% endfor %}
                         </div>
                       </div>
                     {% endif %}
+                  {% endif %}
+
+                  {% if m.entity == "text" %}
+                    <p class="mb-1 text-content">{{ m.content }}</p>
                   {% endif %}
                 </div>
               </div>
@@ -182,17 +219,26 @@
       case "learm-more":
         document.querySelector('#chat-body').innerHTML += learnMoreBox(data);
 
+        if (!data.is_system_message && data.entity == 'learm-more') {
+          let selectedOption = data.learn_more_options.find(option => option.id == data.message);
+
+          const value = selectedOption.mesage,
+            message = value,
+            engagementId= '',
+            entity = 'text',
+            answer = '',
+            params = {message, roomId, engagementId, entity, answer};
+  
+          sendData(params);
+        }
+
         break;
 
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
 
-        console.log(data);
-
         if (data.answer && data.entity !== "learm-more") {
           $(`div[id=${data.question_id}]`).css({"display": "none"});
-
-          console.log('======================================')
         }
 
         break;
@@ -273,7 +319,7 @@
         message = value,
         question_id = id,
         engagementId= $('#chat-engagement-input').val(),
-        entity = 'text',
+        entity = 'learm-more',
         answer = value,
         params = {message, roomId, engagementId, entity, answer, question_id};
 
