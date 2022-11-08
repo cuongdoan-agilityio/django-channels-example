@@ -63,7 +63,7 @@
                     {% endif %}
                   {% endif %}
 
-                  {% if m.entity == "learm-more" %}
+                  {% if m.entity == "learn-more" %}
                     {% if m.system_message %}
                       <p class="mb-0 text-capitalize">{{ m.content }}</p>
                       <div class='date position-relative' id="{{m.id}}">
@@ -216,10 +216,10 @@
 
         break;
 
-      case "learm-more":
+      case "learn-more":
         document.querySelector('#chat-body').innerHTML += learnMoreBox(data);
 
-        if (!data.is_system_message && data.entity == 'learm-more') {
+        if (!data.is_system_message && data.entity == 'learn-more') {
           let selectedOption = data.learn_more_options.find(option => option.id == data.message);
 
           const value = selectedOption.mesage,
@@ -237,7 +237,7 @@
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
 
-        if (data.answer && data.entity !== "learm-more") {
+        if (data.answer && data.entity !== "learn-more") {
           $(`div[id=${data.question_id}]`).css({"display": "none"});
         }
 
@@ -319,7 +319,7 @@
         message = value,
         question_id = id,
         engagementId= $('#chat-engagement-input').val(),
-        entity = 'learm-more',
+        entity = 'learn-more',
         answer = value,
         params = {message, roomId, engagementId, entity, answer, question_id};
 

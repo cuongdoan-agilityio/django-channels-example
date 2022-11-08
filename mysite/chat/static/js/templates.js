@@ -97,7 +97,7 @@ const renderLearnMoreList = (data) => {
         class="btn-check"
         id="${data.message_id}-${item.id}"
         name="learn-more"
-        value="${item.value}"
+        value="${item.id}"
       >
       <label
         class="btn btn-primary my-1"
@@ -120,7 +120,7 @@ const renderLearnMoreList = (data) => {
       </div>
     `;
   } else {
-    let selectedOption = data.learn_more_options.find(option => option.id = data.message);
+    let selectedOption = data.learn_more_options.find(option => option.id == data.message);
     learnMoreOption += `
       <input
         type="checkbox"

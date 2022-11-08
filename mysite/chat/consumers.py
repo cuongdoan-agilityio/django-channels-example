@@ -85,7 +85,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         learn_more_options = topics_learn
         is_system_message = event["is_system_message"]
 
-        if entity == "learn-more":
+        if entity == "learn-more" and answer:
             answer =  answer.split(",")
 
         # Send message to WebSocket
