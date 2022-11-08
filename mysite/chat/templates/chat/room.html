@@ -66,8 +66,9 @@
                   {% if m.entity == "learn-more" %}
                     {% if m.system_message %}
                       <p class="mb-0 text-capitalize">{{ m.content }}</p>
-                      <div class='date position-relative' id="{{m.id}}">
-                        <div class="pt-3 d-flex topics flex-column align-items-start">
+                      <div class='pt-3 position-relative' id="{{m.id}}">
+                        <small>Choose One:</small>
+                        <div class="d-flex topics flex-column align-items-start">
                           {% for item in learn_more_options %}
                             {% if item.id not in m.answer %}
                               <input
@@ -218,6 +219,16 @@
 
       case "learn-more":
         document.querySelector('#chat-body').innerHTML += learnMoreBox(data);
+        
+        // Remove selected option.
+        $(`input[id=${data.question_id}-${data.message}]`).remove();
+        $(`label[for=${data.question_id}-${data.message}]`).remove();
+
+        // Remove the parent if options removed
+        parentEl = $(`div[id=${data.question_id}]`)
+        if (!parentEl.find("label").length) {
+          parentEl.remove()
+        }
 
         if (!data.is_system_message && data.entity == 'learn-more') {
           let selectedOption = data.learn_more_options.find(option => option.id == data.message);

@@ -113,7 +113,8 @@ const renderLearnMoreList = (data) => {
 
     template += `
       <p class="mb-0">${data.message }</p>
-      <div class="pt-4 position-relative" id="${data.message_id}">
+      <div class="pt-3 position-relative" id="${data.message_id}">
+        <small>Choose One:</small>
         <div class="d-flex topics flex-column align-items-start">
           ${learnMoreOption}
         </div>
