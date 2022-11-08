@@ -171,6 +171,7 @@
     const data = JSON.parse(e.data);
     if (data.message) {
       renderMessage(data);
+      console.log('onmessage', data.message)
       scrollToBottom();
     } else {
       alert('The message was empty!');
@@ -198,6 +199,7 @@
   };
 
   const renderMessage = (data) => {
+    console.log('renderMessage')
     switch(data.entity) {
       case "yes-no":
         document.querySelector('#chat-body').innerHTML += yesNoQuestionBox(data);
@@ -220,14 +222,16 @@
       case "learn-more":
         document.querySelector('#chat-body').innerHTML += learnMoreBox(data);
         
-        // Remove selected option.
-        $(`input[id=${data.question_id}-${data.message}]`).remove();
-        $(`label[for=${data.question_id}-${data.message}]`).remove();
-
-        // Remove the parent if options removed
-        parentEl = $(`div[id=${data.question_id}]`)
-        if (!parentEl.find("label").length) {
-          parentEl.remove()
+        if (data.answer) {
+          // Remove selected option.
+          $(`input[id=${data.question_id}-${data.message}]`).remove();
+          $(`label[for=${data.question_id}-${data.message}]`).remove();
+  
+          // Remove the parent if options removed
+          parentEl = $(`div[id=${data.question_id}]`)
+          if (!parentEl.find("label").length) {
+            parentEl.remove()
+          }
         }
 
         if (!data.is_system_message && data.entity == 'learn-more') {
@@ -257,6 +261,7 @@
   }
 
   const sendData = (params = {}) => {
+    console.log("sendData");
     const paramsToString = JSON.stringify({
       message: params.message,
       room_id: params.roomId,
