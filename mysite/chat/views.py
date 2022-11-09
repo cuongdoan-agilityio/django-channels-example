@@ -5,16 +5,7 @@ from .constants import default_entities_types, topics_learn
 
 
 def index(request):
-    # new_rooms = Room.objects.create(name="P1", date_created="2022-11-2")
-    # new_rooms.save()
-
     rooms = Room.objects.all()
-
-    # new_engagement = Engagement.objects.create(name="Machine", date_created="2022-11-2")
-    # new_engagement.save()
-
-    # new_engagement1 = Engagement.objects.create(name="P1", date_created="2022-11-2")
-    # new_engagement1.save()
 
     return render(
         request,

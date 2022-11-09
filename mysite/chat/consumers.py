@@ -2,14 +2,10 @@ import json
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-# Import the Message model
 from .models import Room, Message, Engagement
 from .constants import topics_learn
 
 SYSTEM_ID = "0a97af48ae414a8b844b77e9b905a4fe"
-
-# prints a random value from the list
-list_index = [0, 1]
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -58,6 +54,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_id = await self.new_message(room_id, message, engagement, entity, answer, is_system_message)
 
         # Send message to room group
+        await self.send_to_group(message, engagement, room_id, entity, message_id, answer, question_id, is_system_message)
+
+        # send topic message, the knowledge the patient is interested in
+        if not is_system_message and entity == "learn-more":
+            # get topic messages
+            topic_messages = [topic["message"] for topic in topics_learn if topic["id"] == answer][0]
+
+            # send the message
+            for topic_message in topic_messages:
+                # system engagement
+                engagement = await self.get_engagement_by_id(SYSTEM_ID)
+                message_id = await self.new_message(room_id, topic_message, engagement, "text", "", True)
+
+                await self.send_to_group(topic_message, engagement, room_id, "text", message_id, "", question_id, True)
+    
+    async def send_to_group(
+        self,
+        message,
+        engagement,
+        room_id,
+        entity,
+        message_id,
+        answer,
+        question_id,
+        is_system_message
+    ):
         await self.channel_layer.group_send(
             self.room_group_name,
             {

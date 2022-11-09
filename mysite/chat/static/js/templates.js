@@ -6,13 +6,13 @@ const messageTemplate = (data, childTemplate) => {
         <div class="message-body">
           <div class="message-content">
             <div class="message-text">
-            ${childTemplate}
+              ${childTemplate}
             </div>
           </div>
         </div>
       </div>
     </div>
-  `
+  `;
 }
 
 const renderYesNoMessageContent = (data) => {
@@ -26,23 +26,22 @@ const renderYesNoMessageContent = (data) => {
         <input type="radio" class="btn-check" id="${data.message_id}-no" name="yes-no" value="no">
         <label class="btn mx-2 btn-danger" for="${data.message_id}-no">No</label>
       </div>
-    `
-  } else {
-    return `
-      <p class="mb-0 text-capitalize">${data.answer}</p>
-    `
+    `;
   }
+
+  return `<p class="mb-0 text-capitalize">${data.answer}</p>`;
 }
 
 const yesNoQuestionBox = (data) => {
   let childTemplate = renderYesNoMessageContent(data);
-  return messageTemplate(data, childTemplate)
+
+  return messageTemplate(data, childTemplate);
 }
 
 const textMessageBox = (data) => {
-  textTemplate = `<p class="mb-0">${data.message }</p>`;
+  let childTemplate = `<p class="mb-0">${data.message}</p>`;
 
-  return messageTemplate(data, textTemplate);
+  return messageTemplate(data, childTemplate);
 }
 
 const renderDateTimePickerContent = (data) => {
@@ -63,12 +62,10 @@ const renderDateTimePickerContent = (data) => {
           <small id="datetime-help">Choose A Date and Time.</small>
         </div>
       </div>
-    `
-  } else {
-    return `
-      <p class="mb-0 text-capitalize">${data.answer}</p>
-    `
+    `;
   }
+  
+  return `<p class="mb-0 text-capitalize">${data.answer}</p>`;
 }
 
 const renderLearnMoreContent = (data) => {
@@ -76,39 +73,30 @@ const renderLearnMoreContent = (data) => {
 }
 
 const dateTimePickerBox = (data) => {
-  dateTimePickertemplate = renderDateTimePickerContent(data)
-  return messageTemplate(data, dateTimePickertemplate);
+  let childTemplate = renderDateTimePickerContent(data);
+
+  return messageTemplate(data, childTemplate);
 }
 
 const learnMoreBox = (data) => {
-  contentTemplate = renderLearnMoreContent(data)
-  return messageTemplate(data, contentTemplate);
+  let childTemplate = renderLearnMoreList(data);
+
+  return messageTemplate(data, childTemplate);
 }
 
 const renderLearnMoreList = (data) => {
   let learnMoreOption = '',
-    template = '';
+      template = '';
 
   if (data.is_system_message) {
     (data.learn_more_options || []).map((item) => {
       learnMoreOption += `
-      <input
-        type="checkbox"
-        class="btn-check"
-        id="${data.message_id}-${item.id}"
-        name="learn-more"
-        value="${item.id}"
-      >
-      <label
-        class="btn btn-primary my-1"
-        for="${data.message_id}-${item.id}"
-      >
-        <i class="bi bi-check-circle"></i>
-        <span class="ms-2">
-          ${item.title}
-        </span>
-      </label>
-      `
+        <input type="checkbox" class="btn-check" id="${data.message_id}-${item.id}" name="learn-more" value="${item.id}">
+        <label class="btn btn-primary my-1" for="${data.message_id}-${item.id}">
+          <i class="bi bi-check-circle"></i>
+          <span class="ms-2">${item.title}</span>
+        </label>
+      `;
     });
 
     template += `
@@ -122,22 +110,12 @@ const renderLearnMoreList = (data) => {
     `;
   } else {
     let selectedOption = data.learn_more_options.find(option => option.id == data.message);
+    
     learnMoreOption += `
-      <input
-        type="checkbox"
-        class="btn-check"
-        id="${data.message_id}-${selectedOption.id}"
-        name="learn-more-answer"
-        value="${selectedOption.id}"
-      >
-      <label
-        class="btn btn-outline-primary my-1"
-        for="${data.message_id}-${selectedOption.id}"
-      >
+      <input type="checkbox" class="btn-check" id="${data.message_id}-${selectedOption.id}" name="learn-more-answer" value="${selectedOption.id}">
+      <label class="btn btn-outline-primary my-1" for="${data.message_id}-${selectedOption.id}">
         <i class="bi bi-check-circle"></i>
-        <span class="ms-2">
-          ${selectedOption.title}
-        </span>
+        <span class="ms-2">${selectedOption.title}</span>
       </label>
     `;
 
@@ -147,7 +125,7 @@ const renderLearnMoreList = (data) => {
           ${learnMoreOption}
         </div>
       </div>
-    `
+    `;
   }
 
   return template;
