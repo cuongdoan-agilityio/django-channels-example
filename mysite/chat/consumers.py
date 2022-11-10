@@ -61,13 +61,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # get topic messages
             topic_messages = [topic["message"] for topic in topics_learn if topic["id"] == answer][0]
 
+            engagement = await self.get_engagement_by_id(SYSTEM_ID)
             # send the message
             for topic_message in topic_messages:
                 # system engagement
-                engagement = await self.get_engagement_by_id(SYSTEM_ID)
                 message_id = await self.new_message(room_id, topic_message, engagement, "text", "", True)
 
                 await self.send_to_group(topic_message, engagement, room_id, "text", message_id, "", question_id, True)
+
+            clone_message = await self.clone_message(question_id)
+
+            if clone_message:
+                await self.send_to_group(clone_message.content, engagement, room_id, clone_message.entity, clone_message.id, clone_message.answer, clone_message.id, True)
     
     async def send_to_group(
         self,
@@ -146,7 +151,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def update_message(self, id, answer):
         message = Message.objects.get(pk=id)
         if message.entity == "learn-more":
-            answer = f"{message.answer},{answer}"
-
+            if message.answer:
+                answer = f"{message.answer},{answer}"
+            else:
+                answer = answer
         message.answer = answer
         message.save()
+
+    @sync_to_async
+    def clone_message(self, id):
+        message = Message.objects.get(pk=id)
+
+        list_answer = message.answer.split(',')
+        if len(list_answer) < len(topics_learn) - 1:
+            new_message = Message.objects.create(
+                engagement=message.engagement,
+                room=message.room,
+                content=message.content,
+                entity = message.entity,
+                system_message = message.system_message,
+                answer = message.answer
+            )
+
+            return new_message
+        return

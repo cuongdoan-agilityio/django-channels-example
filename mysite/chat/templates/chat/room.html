@@ -220,10 +220,29 @@
         document.querySelector('#chat-body').innerHTML += learnMoreBox(data);
         
         if (data.answer) {
+          listAnswer = String(data.answer).split(',') || [];
+
+          let parentEl = $(`div[id=${data.question_id}]`);
+          let inputList = parentEl.find("input");
+          let labelList = parentEl.find("label")
+
           // Remove selected option.
-          $(`input[id=${data.question_id}-${data.message}]`).remove();
-          $(`label[for=${data.question_id}-${data.message}]`).remove();
+          listAnswer.forEach((answer) => {
+              inputList.each(function() {
+                if ($(this).attr("id") === `${data.question_id}-${answer}`) {
+                  selectedLabel = $(this)[0];
+                  selectedLabel.remove();
+                } 
+              });
   
+              labelList.each(function() {
+                if ($(this).attr("for") === `${data.question_id}-${answer}`) {
+                  selectedLabel = $(this)[0];
+                  selectedLabel.remove();
+                } 
+              });
+          });
+
           // Remove the parent if options removed
           parentEl = $(`div[id=${data.question_id}]`);
           if (!parentEl.find("label").length) {

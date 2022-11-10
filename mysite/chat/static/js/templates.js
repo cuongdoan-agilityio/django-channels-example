@@ -92,7 +92,7 @@ const renderLearnMoreList = (data) => {
     (data.learn_more_options || []).map((item) => {
       learnMoreOption += `
         <input type="checkbox" class="btn-check" id="${data.message_id}-${item.id}" name="learn-more" value="${item.id}">
-        <label class="btn btn-primary my-1" for="${data.message_id}-${item.id}">
+        <label class="btn btn-primary topics-label my-1" for="${data.message_id}-${item.id}">
           <i class="bi bi-check-circle"></i>
           <span class="ms-2">${item.title}</span>
         </label>
@@ -113,7 +113,7 @@ const renderLearnMoreList = (data) => {
     
     learnMoreOption += `
       <input type="checkbox" class="btn-check" id="${data.message_id}-${selectedOption.id}" name="learn-more-answer" value="${selectedOption.id}">
-      <label class="btn btn-outline-primary my-1" for="${data.message_id}-${selectedOption.id}">
+      <label class="btn btn-outline-primary topics-label my-1" for="${data.message_id}-${selectedOption.id}">
         <i class="bi bi-check-circle"></i>
         <span class="ms-2">${selectedOption.title}</span>
       </label>
