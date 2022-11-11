@@ -130,3 +130,17 @@ const renderLearnMoreList = (data) => {
 
   return template;
 };
+
+const renderEmbeddedPicture = (data) => {
+  let template = `
+    <div id="${data.message_id}">
+      <img
+        width="200"
+        name="embedded-picture"
+        src="${data.message}"
+        alt=""
+      />    
+    </div>
+  `
+  return messageTemplate(data, template);
+};

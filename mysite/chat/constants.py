@@ -3,6 +3,7 @@ default_entities_types = [
     {"id": "yes-no", "label": "Yes/No Interaction"},
     {"id": "date-time", "label": "Date time picker"},
     {"id": "learn-more", "label": "Learn More"},
+    {"id": "embedded-picture", "label": "Embedded Picture"},
 ]
 
 topics_learn = [

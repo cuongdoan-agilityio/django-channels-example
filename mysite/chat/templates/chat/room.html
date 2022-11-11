@@ -4,130 +4,150 @@
 
 {% block content %}
 <div class="container">
-  <div class="hide-scrollbar flex-1 mb-3" id="chat-body">
-    <div class="chat-body-inner">
-      {% for m in messages %}
-        <div class="message {% if m.engagement.name != 'Machine'%} message-out {%endif%}">
-          <p class="username">{{ m.engagement.name }}</p>
-          <div class="message-inner">
-            <div class="message-body">
-              <div class="message-content">
-                <div class="message-text">
-                  {% if m.entity == "yes-no" %}
-                    {% if not m.answer %}
-                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
-                      <div class="pt-4 position-relative" id="{{m.id}}">
-                        <input
-                          type="radio"
-                          class="btn-check"
-                          id="{{m.id}}-yes"
-                          name="yes-no"
-                          value="yes"
-                          onchange="answerYesNo({{m.id}}, 'yes', {{m.entity}})"
-                        >
-                        <label class="btn btn-primary" for="{{m.id}}-yes">Yes</label>
-                
-                        <input
-                          type="radio"
-                          class="btn-check"
-                          id="{{m.id}}-no"
-                          name="yes-no"
-                          value="no"
-                          onchange="answerYesNo({{m.id}}, 'no', {{m.entity}})"
-                        >
-                        <label class="btn mx-2 btn-danger" for="{{m.id}}-no">No</label>
-                      </div>
-                    {% else %}
-                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
-                    {% endif %}
-                  {% endif %}
-
-                  {% if m.entity == "date-time" %}
-                    {% if not m.answer %}
-                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
-                      <div class='date position-relative' id="{{m.id}}">
-                        <div class="pt-3 d-flex flex-column">
-                          <!-- time -->
+  <div class="hide-scrollbar flex-1 mb-3">
+    <div id="chat-body">
+      <div class="chat-body-inner">
+        {% for m in messages %}
+          <div class="message {% if m.engagement.name != 'Machine'%} message-out {%endif%}">
+            <p class="username">{{ m.engagement.name }}</p>
+            <div class="message-inner">
+              <div class="message-body">
+                <div class="message-content">
+                  <div class="message-text">
+                    {% if m.entity == "yes-no" %}
+                      {% if not m.answer %}
+                        <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                        <div class="pt-4 position-relative" id="{{m.id}}">
                           <input
-                            class="form-control"
-                            type="datetime-local"
-                            id="{{m.id}}-time"
-                            name="date-time"
-                            onkeydown="return false;"
+                            type="radio"
+                            class="btn-check"
+                            id="{{m.id}}-yes"
+                            name="yes-no"
+                            value="yes"
+                            onchange="answerYesNo({{m.id}}, 'yes', {{m.entity}})"
                           >
-                          <small id="datetime-help">Choose A Date and Time.</small>
+                          <label class="btn btn-primary" for="{{m.id}}-yes">Yes</label>
+                  
+                          <input
+                            type="radio"
+                            class="btn-check"
+                            id="{{m.id}}-no"
+                            name="yes-no"
+                            value="no"
+                            onchange="answerYesNo({{m.id}}, 'no', {{m.entity}})"
+                          >
+                          <label class="btn mx-2 btn-danger" for="{{m.id}}-no">No</label>
                         </div>
-                      </div>
-                    {% else %}
-                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                      {% else %}
+                        <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                      {% endif %}
                     {% endif %}
-                  {% endif %}
-
-                  {% if m.entity == "learn-more" %}
-                    {% if m.system_message %}
-                      <p class="mb-0 text-capitalize">{{ m.content }}</p>
-                      <div class='pt-3 position-relative' id="{{m.id}}">
-                        <small>Choose One:</small>
-                        <div class="d-flex topics flex-column align-items-start">
-                          {% for item in learn_more_options %}
-                            {% if item.id not in m.answer %}
-                              <input
-                                type="checkbox"
-                                class="btn-check"
-                                id="{{m.id}}-{{item.id}}"
-                                name="learn-more"
-                                value="{{item.id}}"
-                              >
-                              <label
-                                class="btn btn-primary topics-label my-1"
-                                for="{{m.id}}-{{item.id}}"
-                              >
-                                <i class="bi bi-check-circle"></i>
-                                <span class="ms-2">
-                                  {{item.title}}
-                                </span>
-                              </label>
-                            {% endif %}
-                          {% endfor %}
+  
+                    {% if m.entity == "date-time" %}
+                      {% if not m.answer %}
+                        <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                        <div class='date position-relative' id="{{m.id}}">
+                          <div class="pt-3 d-flex flex-column">
+                            <!-- time -->
+                            <input
+                              class="form-control"
+                              type="datetime-local"
+                              id="{{m.id}}-time"
+                              name="date-time"
+                              onkeydown="return false;"
+                            >
+                            <small id="datetime-help">Choose A Date and Time.</small>
+                          </div>
                         </div>
-                      </div>
-                    {% else %}
-                      <div class='date position-relative' id="{{m.id}}">
-                        <div class="d-flex topics flex-column align-items-start">
-                          {% for item in learn_more_options %}
-                            {% if item.id == m.content %}
-                              <input
-                                type="checkbox"
-                                class="btn-check"
-                                id="{{m.id}}-{{item.id}}"
-                                name="learn-more"
-                                value="{{item.id}}"
-                              >
-                              <label
-                                class="btn btn-outline-primary topics-label my-1"
-                                for="{{m.id}}-{{item.id}}"
-                              >
-                                <i class="bi bi-check-circle"></i>
-                                <span class="ms-2">
-                                  {{item.title}}
-                                </span>
-                              </label>
-                            {% endif %}
-                          {% endfor %}
+                      {% else %}
+                        <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                      {% endif %}
+                    {% endif %}
+  
+                    {% if m.entity == "learn-more" %}
+                      {% if m.system_message %}
+                        <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                        <div class='pt-3 position-relative' id="{{m.id}}">
+                          <small>Choose One:</small>
+                          <div class="d-flex topics flex-column align-items-start">
+                            {% for item in learn_more_options %}
+                              {% if item.id not in m.answer %}
+                                <input
+                                  type="checkbox"
+                                  class="btn-check"
+                                  id="{{m.id}}-{{item.id}}"
+                                  name="learn-more"
+                                  value="{{item.id}}"
+                                >
+                                <label
+                                  class="btn btn-primary topics-label my-1"
+                                  for="{{m.id}}-{{item.id}}"
+                                >
+                                  <i class="bi bi-check-circle"></i>
+                                  <span class="ms-2">
+                                    {{item.title}}
+                                  </span>
+                                </label>
+                              {% endif %}
+                            {% endfor %}
+                          </div>
                         </div>
+                      {% else %}
+                        <div class='date position-relative' id="{{m.id}}">
+                          <div class="d-flex topics flex-column align-items-start">
+                            {% for item in learn_more_options %}
+                              {% if item.id == m.content %}
+                                <input
+                                  type="checkbox"
+                                  class="btn-check"
+                                  id="{{m.id}}-{{item.id}}"
+                                  name="learn-more"
+                                  value="{{item.id}}"
+                                >
+                                <label
+                                  class="btn btn-outline-primary topics-label my-1"
+                                  for="{{m.id}}-{{item.id}}"
+                                >
+                                  <i class="bi bi-check-circle"></i>
+                                  <span class="ms-2">
+                                    {{item.title}}
+                                  </span>
+                                </label>
+                              {% endif %}
+                            {% endfor %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+  
+                    {% if m.entity == "embedded-picture" %}
+                      <div id="{{m.id}}">
+                        <img name="embedded-picture" width="200" src="{{m.content}}" alt=""/>
                       </div>
                     {% endif %}
-                  {% endif %}
-
-                  {% if m.entity == "text" %}
-                    <p class="mb-1 text-content">{{ m.content }}</p>
-                  {% endif %}
+  
+                    {% if m.entity == "text" %}
+                      <p class="mb-1 text-content">{{ m.content }}</p>
+                    {% endif %}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="overlay modal" id="overlay">
+      <div id="overlayContent" class="position-relative">
+        <div>
+          <div class="position-absolute tool-box">
+            <button id="hide-popup" class="btn"><i class="bi bi-x-lg"></i></button>
+            <button id="download-image" class="btn"><i class="bi bi-download"></i></button>
+          </div>
         </div>
-      {% endfor %}
+        <img id="imgBig" src="" alt="" class="modal-content"/>
+      </div>
     </div>
   </div>
 
@@ -251,6 +271,10 @@
         }
         break;
 
+      case "embedded-picture":
+        document.querySelector('#chat-body').innerHTML += renderEmbeddedPicture(data);
+        break;
+
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
 
@@ -349,9 +373,40 @@
     });
   }
 
+  const downloadImage = async (source) => {
+    const fileName = source.split('/').pop(),
+          el = document.createElement("a");
+    
+    el.href = source;
+    el.download = fileName;
+    document.body.appendChild(el);
+    el.click();
+    el.remove();
+  }
+
+  const handleEmbeddedPicture = () => {
+    $('#chat-body').on('click', 'img[name=embedded-picture]', function (event) {
+      $("#imgBig").attr("src",$(this).prop('src'));
+      $("#overlay").show();
+    });
+
+    $("#hide-popup").click(function(){
+      $("#imgBig").attr("src", "");
+      $("#overlay").hide();
+    });
+
+    $("#download-image").click(function(){
+      event.preventDefault();
+      const url = $("#imgBig").attr("src");
+      downloadImage(url);
+      $("#overlay").hide();
+    });
+  }
+
   handleYesNo();
   handleDateTime();
   handleLearnMore();
+  handleEmbeddedPicture();
   scrollToBottom();
   setDefaultDateTime();
 </script>
