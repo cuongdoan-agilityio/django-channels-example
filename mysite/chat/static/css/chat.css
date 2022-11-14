@@ -118,7 +118,7 @@
   background-color: rgba(0,0,0,0.6);
 }
 
-#overlayContent{
+.overlay-content{
   max-width: 500px;
   margin: 0 auto;
 }
@@ -126,4 +126,14 @@
 .tool-box {
   right: 0;
   z-index: 100;
+}
+
+.play-btn {
+  cursor: pointer;
+  position: absolute;
+  height: 72px;
+  top: 50%;
+  left: 50%;
+  margin-right: 0;
+  transform: translate(-50%, -50%);
 }

@@ -144,3 +144,36 @@ const renderEmbeddedPicture = (data) => {
   `
   return messageTemplate(data, template);
 };
+
+const renderEmbeddedVideo = (data) => {
+  let template = `
+    <div id="${data.message_id}">
+      <div class="position-relative">
+        <video
+          class=""
+          id="video-${data.message_id}"
+          src="${data.message}"
+        ></video>
+        <div>
+          <div class="position-absolute top-0 w-100 h-100">
+            <i class="play-btn position-absolute" name="zoom-video" videoId="${data.message_id}">
+              <div
+                aria-label=""
+                class=""
+                role="button"
+                tabindex="-1"
+              >
+                <i
+                  data-visualcompletion="css-img"
+                  class=""
+                  style="background-image: url('https://static.xx.fbcdn.net/rsrc.php/v3/y4/r/Cpff0EVHLQh.png'); background-position: 0px 0px; background-size: auto; width: 72px; height: 72px; background-repeat: no-repeat; display: inline-block;"
+                ></i>
+              </div>
+            </i>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+  return messageTemplate(data, template);
+};

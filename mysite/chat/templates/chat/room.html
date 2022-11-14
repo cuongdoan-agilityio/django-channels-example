@@ -125,6 +125,37 @@
                         <img name="embedded-picture" width="200" src="{{m.content}}" alt=""/>
                       </div>
                     {% endif %}
+
+                    {% if m.entity == "embedded-video" %}
+                      <div id="{{m.id}}">
+                        <div class="position-relative">
+                          <!-- add `controls` attribute will display video control -->
+                          <video
+                            class=""
+                            id="video-{{m.id}}"
+                            src="https://www.w3schools.com/html/mov_bbb.mp4"
+                          ></video>
+                          <div>
+                            <div class="position-absolute top-0 w-100 h-100">
+                              <i class="play-btn position-absolute" name="zoom-video" videoId="{{m.id}}">
+                                <div
+                                  aria-label=""
+                                  class=""
+                                  role="button"
+                                  tabindex="-1"
+                                >
+                                  <i
+                                    data-visualcompletion="css-img"
+                                    class=""
+                                    style="background-image: url('https://static.xx.fbcdn.net/rsrc.php/v3/y4/r/Cpff0EVHLQh.png'); background-position: 0px 0px; background-size: auto; width: 72px; height: 72px; background-repeat: no-repeat; display: inline-block;"
+                                  ></i>
+                                </div>
+                              </i>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endif %}
   
                     {% if m.entity == "text" %}
                       <p class="mb-1 text-content">{{ m.content }}</p>
@@ -139,7 +170,7 @@
     </div>
 
     <div class="overlay modal" id="overlay">
-      <div id="overlayContent" class="position-relative">
+      <div id="overlayContent" class="overlay-content position-relative">
         <div>
           <div class="position-absolute tool-box">
             <button id="hide-popup" class="btn"><i class="bi bi-x-lg"></i></button>
@@ -147,6 +178,20 @@
           </div>
         </div>
         <img id="imgBig" src="" alt="" class="modal-content"/>
+      </div>
+    </div>
+
+    <div class="overlay modal" id="overlay-video">
+      <div id="overlayVideoContent" class="overlay-content position-relative">
+        <div class="position-absolute tool-box">
+          <button id="hide-popup-video" class="btn"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <video
+          class="w-100"
+          id="big-video"
+          controls
+          scr=""
+        ></video>
       </div>
     </div>
   </div>
@@ -273,6 +318,10 @@
 
       case "embedded-picture":
         document.querySelector('#chat-body').innerHTML += renderEmbeddedPicture(data);
+        break;
+
+      case "embedded-video":
+        document.querySelector('#chat-body').innerHTML += renderEmbeddedVideo(data);
         break;
 
       default:
@@ -410,7 +459,6 @@
           el = document.createElement("a");
         el.href = result;
         el.download = fileName;
-        el.target='_blank'
         document.body.appendChild(el);
         el.click();
         el.remove();
@@ -454,10 +502,27 @@
     });
   }
 
+  const handleEmbeddedVideo = () => {
+    $('#chat-body').on('click', 'i[name=zoom-video]', function (event) {
+      let videoId = $(this).attr("videoId");
+      let videoSrc = $(`#video-${videoId}`).attr("src");
+    
+      $("#big-video").attr("src",videoSrc);
+      $("#overlay-video").show();
+    });
+
+    $("#hide-popup-video").click(function(){
+      $("#big-video").get(0).pause();
+      $("#big-video").attr("src", "");
+      $("#overlay-video").hide();
+    });
+  }
+
   handleYesNo();
   handleDateTime();
   handleLearnMore();
   handleEmbeddedPicture();
+  handleEmbeddedVideo();
   scrollToBottom();
   setDefaultDateTime();
 </script>
