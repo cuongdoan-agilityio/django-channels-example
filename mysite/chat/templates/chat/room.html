@@ -384,6 +384,57 @@
     el.remove();
   }
 
+  function downloadFileWithXML(url) {
+    const fileName = url.split('/').pop(),
+      el = document.createElement("a");
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+        var myBlob = this.response;
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(myBlob);
+        link.download = fileName;
+        link.click();
+      }
+    };
+    xhr.send();
+  }
+
+  async function downloadFileWithBase64(url) {
+    getBase64ImageFromUrl(url).then(
+      result => {
+        const fileName = url.split('/').pop(),
+          el = document.createElement("a");
+        el.href = result;
+        el.download = fileName;
+        el.target='_blank'
+        document.body.appendChild(el);
+        el.click();
+        el.remove();
+      }
+    )
+  }
+
+  async function getBase64ImageFromUrl(imageUrl) {
+    var res = await fetch(imageUrl);
+    var blob = await res.blob();
+  
+    return new Promise((resolve, reject) => {
+      var reader  = new FileReader();
+      reader.addEventListener("load", function () {
+          resolve(reader.result);
+      }, false);
+  
+      reader.onerror = () => {
+        return reject(this);
+      };
+      reader.readAsDataURL(blob);
+    })
+  }
+
   const handleEmbeddedPicture = () => {
     $('#chat-body').on('click', 'img[name=embedded-picture]', function (event) {
       $("#imgBig").attr("src",$(this).prop('src'));
@@ -398,7 +449,7 @@
     $("#download-image").click(function(){
       event.preventDefault();
       const url = $("#imgBig").attr("src");
-      downloadImage(url);
+      downloadFileWithBase64(url);
       $("#overlay").hide();
     });
   }
