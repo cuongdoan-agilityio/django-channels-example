@@ -342,6 +342,7 @@
       entity: params.entity,
       ...(params.answer ? {answer: params.answer} : {}),
       ...(params.question_id ? {question_id: params.question_id} : {}),
+      ...(params.only_view ? {only_view: params.only_view} : {}),
     });
 
     chatSocket.send(paramsToString);
@@ -433,6 +434,16 @@
     el.remove();
   }
 
+  async function downloadImageWithFetch(source) {
+    const fileName = source.split("/").pop(),
+      el = document.createElement("a");
+
+    const image = await fetch(source);
+    const imageBlog = await image.blob();
+    const imageUrl = window.URL.createObjectURL(imageBlog);
+    saveAs(imageBlog, fileName);
+  }
+
   function downloadFileWithXML(url) {
     const fileName = url.split('/').pop(),
       el = document.createElement("a");
@@ -487,6 +498,16 @@
     $('#chat-body').on('click', 'img[name=embedded-picture]', function (event) {
       $("#imgBig").attr("src",$(this).prop('src'));
       $("#overlay").show();
+
+      // Mark the patient who watched the image
+      const engagementId = $('#chat-engagement-input').val(),
+        message = " ",
+        question_id = $(this).parent().attr("id")
+        entity = "embedded-picture",
+        only_view = true
+        params = {message, roomId, engagementId, entity, question_id, only_view};
+
+      sendData(params);
     });
 
     $("#hide-popup").click(function(){
@@ -497,7 +518,7 @@
     $("#download-image").click(function(){
       event.preventDefault();
       const url = $("#imgBig").attr("src");
-      downloadFileWithBase64(url);
+      downloadImageWithFetch(url);
       $("#overlay").hide();
     });
   }
@@ -509,6 +530,16 @@
     
       $("#big-video").attr("src",videoSrc);
       $("#overlay-video").show();
+
+      // Mark the patient who watched the video
+      const engagementId = $('#chat-engagement-input').val(),
+        message = " ",
+        question_id = videoId
+        entity = "embedded-video",
+        only_view = true
+        params = {message, roomId, engagementId, entity, question_id, only_view};
+
+      sendData(params);
     });
 
     $("#hide-popup-video").click(function(){

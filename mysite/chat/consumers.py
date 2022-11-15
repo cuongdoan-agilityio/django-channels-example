@@ -47,33 +47,79 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # The question id
         question_id = data["question_id"] if "question_id" in data else None
 
-        if answer:
+        only_view = True if "only_view" in data else False
+
+        if not only_view:
+            if answer:
+                await self.update_message(question_id, answer)
+
+            engagement = await self.get_engagement_by_id(engagement_id)
+            message_id = await self.new_message(
+                room_id,
+                message,
+                engagement,
+                entity,
+                answer,
+                is_system_message
+            )
+
+            # Send message to room group
+            await self.send_to_group(
+                message,
+                engagement,
+                room_id,
+                entity,
+                message_id,
+                answer,
+                question_id,
+                is_system_message
+            )
+
+            # send topic message, the knowledge the patient is interested in
+            if not is_system_message and entity == "learn-more":
+                # get topic messages
+                topic_messages = [topic["message"] for topic in topics_learn if topic["id"] == answer][0]
+
+                engagement = await self.get_engagement_by_id(SYSTEM_ID)
+                # send the message
+                for topic_message in topic_messages:
+                    # system engagement
+                    message_id = await self.new_message(
+                        room_id,
+                        topic_message,
+                        engagement,
+                        "text",
+                        "",
+                        True
+                    )
+
+                    await self.send_to_group(
+                        topic_message,
+                        engagement,
+                        room_id,
+                        "text",
+                        message_id,
+                        "",
+                        question_id,
+                        True
+                    )
+
+                clone_message = await self.clone_message(question_id)
+
+                if clone_message:
+                    await self.send_to_group(
+                        clone_message.content,
+                        engagement,
+                        room_id,
+                        clone_message.entity,
+                        clone_message.id,
+                        clone_message.answer,
+                        clone_message.id,
+                        True
+                    )
+        else:
             await self.update_message(question_id, answer)
 
-        engagement = await self.get_engagement_by_id(engagement_id)
-        message_id = await self.new_message(room_id, message, engagement, entity, answer, is_system_message)
-
-        # Send message to room group
-        await self.send_to_group(message, engagement, room_id, entity, message_id, answer, question_id, is_system_message)
-
-        # send topic message, the knowledge the patient is interested in
-        if not is_system_message and entity == "learn-more":
-            # get topic messages
-            topic_messages = [topic["message"] for topic in topics_learn if topic["id"] == answer][0]
-
-            engagement = await self.get_engagement_by_id(SYSTEM_ID)
-            # send the message
-            for topic_message in topic_messages:
-                # system engagement
-                message_id = await self.new_message(room_id, topic_message, engagement, "text", "", True)
-
-                await self.send_to_group(topic_message, engagement, room_id, "text", message_id, "", question_id, True)
-
-            clone_message = await self.clone_message(question_id)
-
-            if clone_message:
-                await self.send_to_group(clone_message.content, engagement, room_id, clone_message.entity, clone_message.id, clone_message.answer, clone_message.id, True)
-    
     async def send_to_group(
         self,
         message,
@@ -135,7 +181,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return Engagement.objects.get(uuid=engagement_id)
 
     @sync_to_async
-    def new_message(self, room_id, message, engagement, entity, answer, system_message):
+    def new_message(
+        self,
+        room_id,
+        message,
+        engagement,
+        entity,
+        answer,
+        system_message
+    ):
         room = Room.objects.get(uuid=room_id)
         new_message = Message.objects.create(
             engagement=engagement,
@@ -154,8 +208,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if message.answer:
                 answer = f"{message.answer},{answer}"
             else:
-                answer = answer
+                answer = answer if answer else ""
         message.answer = answer
+        message.viewed = True
         message.save()
 
     @sync_to_async
