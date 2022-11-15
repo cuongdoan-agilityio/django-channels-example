@@ -177,3 +177,41 @@ const renderEmbeddedVideo = (data) => {
   `
   return messageTemplate(data, template);
 };
+
+const renderNumberInput = (data) => {
+  let template = renderNumberInputContent(data)
+  return messageTemplate(data, template);
+};
+
+const renderNumberInputContent = (data) => {
+  if (data.is_system_message) {
+    return `
+      <p class="mb-0">${data.message }</p>
+      <div class="pt-3 position-relative" id="${data.message_id}">
+        <div class="d-flex topics flex-column align-items-start">
+          <input
+            class="form-control text-center"
+            type="number"
+            inputmode="numeric"
+            name="number-input"
+          >
+        </div>
+      </div>
+    `;
+  } else {
+    return `
+      <div class="position-relative" id="${data.message_id}">
+        <div class="d-flex topics flex-column align-items-start">
+          <input
+            class="form-control text-center"
+            type="number"
+            inputmode="numeric"
+            name="number-input-answer"
+            value="${data.message}"
+            readonly
+          >
+        </div>
+      </div>
+    `;
+  }
+}

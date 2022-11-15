@@ -156,7 +156,38 @@
                         </div>
                       </div>
                     {% endif %}
-  
+
+                    {% if m.entity == "number-input" %}
+                      {% if m.system_message %}
+                        <p class="mb-0 text-capitalize">{{ m.content }}</p>
+                        {% if not m.answer %}
+                          <div class='date position-relative' id="{{m.id}}">
+                            <div class="pt-3 d-flex flex-column">
+                              <input
+                                class="form-control text-center"
+                                type="number"
+                                inputmode="numeric"
+                                name="number-input"
+                              >
+                            </div>
+                          </div>
+                        {% endif %}
+                      {% else %}
+                        <div class='date position-relative' id="{{m.id}}">
+                          <div class="d-flex flex-column">
+                            <input
+                              class="form-control text-center"
+                              type="number"
+                              inputmode="numeric"
+                              name="number-input-answer"
+                              readonly
+                              value="{{m.content}}"
+                            >
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endif %}
+
                     {% if m.entity == "text" %}
                       <p class="mb-1 text-content">{{ m.content }}</p>
                     {% endif %}
@@ -324,6 +355,15 @@
         document.querySelector('#chat-body').innerHTML += renderEmbeddedVideo(data);
         break;
 
+      case "number-input":
+        document.querySelector('#chat-body').innerHTML += renderNumberInput(data);
+
+        if (data.answer) {
+          $(`div[id=${data.question_id}]`).css({"display": "none"});
+        }
+
+        break;
+      
       default:
         document.querySelector('#chat-body').innerHTML += textMessageBox(data);
 
@@ -332,6 +372,8 @@
         }
         break;
     }
+
+    scrollToBottom();
   }
 
   const sendData = (params = {}) => {
@@ -549,11 +591,32 @@
     });
   }
 
+  const handleNumberInput = () => {
+    $('#chat-body').on('blur', 'input[type=number][name=number-input]', function (event) {
+      event.preventDefault();
+      const engagementId= $('#chat-engagement-input').val();
+
+      if (engagementId) {
+        const value = $(this).val(),
+          parentEl = $(this).parent().parent(),
+          id = parentEl.attr('id'),
+          message = value,
+          question_id = id,
+          entity = 'number-input',
+          answer = value,
+          params = {message, roomId, engagementId, entity, answer, question_id};
+  
+        sendData(params);
+      }
+    });
+  }
+
   handleYesNo();
   handleDateTime();
   handleLearnMore();
   handleEmbeddedPicture();
   handleEmbeddedVideo();
+  handleNumberInput();
   scrollToBottom();
   setDefaultDateTime();
 </script>

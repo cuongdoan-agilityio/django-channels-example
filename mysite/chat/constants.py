@@ -5,6 +5,7 @@ default_entities_types = [
     {"id": "learn-more", "label": "Learn More"},
     {"id": "embedded-picture", "label": "Embedded Picture"},
     {"id": "embedded-video", "label": "Embedded Video"},
+    {"id": "number-input", "label": "Number Input"},
 ]
 
 topics_learn = [
