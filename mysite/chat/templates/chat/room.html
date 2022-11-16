@@ -1,6 +1,7 @@
 {% extends 'chat/index.html' %}
 
 {% block title %}Welcome | {% endblock %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container">
@@ -188,6 +189,12 @@
                       {% endif %}
                     {% endif %}
 
+                    {% if m.entity == "embedded-hyperlink" %}
+                      <div class='position-relative' id="{{m.id}}">
+                        {{m.content|hyperlink_template}} 
+                      </div>
+                    {% endif %}
+
                     {% if m.entity == "text" %}
                       <p class="mb-1 text-content">{{ m.content }}</p>
                     {% endif %}
@@ -361,6 +368,11 @@
         if (data.answer) {
           $(`div[id=${data.question_id}]`).css({"display": "none"});
         }
+
+        break;
+
+      case "embedded-hyperlink":
+        document.querySelector('#chat-body').innerHTML += renderEmbeddedHyperlink(data);
 
         break;
       
@@ -611,12 +623,26 @@
     });
   }
 
+  const handleHyperLink = () => {
+    $('#chat-body').on('click', 'a[name=hyperlink]', function (event) {
+      const engagementId = $('#chat-engagement-input').val(),
+        message = " ",
+        question_id = $(this).parent().parent().attr("id")
+        entity = "embedded-hyperlink",
+        only_view = true,
+        params = {message, roomId, engagementId, entity, question_id, only_view};
+
+      sendData(params);
+    });
+  }
+
   handleYesNo();
   handleDateTime();
   handleLearnMore();
   handleEmbeddedPicture();
   handleEmbeddedVideo();
   handleNumberInput();
+  handleHyperLink();
   scrollToBottom();
   setDefaultDateTime();
 </script>

@@ -215,3 +215,21 @@ const renderNumberInputContent = (data) => {
     `;
   }
 }
+
+const renderEmbeddedHyperlink = (data) => {
+  let template = `
+    <div class='position-relative' id="${data.message_id}">
+      <p class="mb-0">${changeHyperLinkMessage(data.message)}</p>
+    </div>
+  `;
+  return messageTemplate(data, template);
+};
+
+
+const changeHyperLinkMessage = (message) => {
+  let rex = /(?:(?:https?|ftp):\/\/|\b(?:[a-z\d]+\.))(?:(?:[^\s()<>]+|\((?:[^\s()<>]+|(?:\([^\s()<>]+\)))?\))+(?:\((?:[^\s()<>]+|(?:\(?:[^\s()<>]+\)))?\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))?/;
+
+  return message.replace(rex, function(url) {
+    return `<a href="${url}" name="hyperlink">${url}</a>`;
+  })
+}

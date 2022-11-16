@@ -6,6 +6,7 @@ default_entities_types = [
     {"id": "embedded-picture", "label": "Embedded Picture"},
     {"id": "embedded-video", "label": "Embedded Video"},
     {"id": "number-input", "label": "Number Input"},
+    {"id": "embedded-hyperlink", "label": "Embedded Hyperlink"},
 ]
 
 topics_learn = [
